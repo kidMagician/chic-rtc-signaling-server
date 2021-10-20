@@ -4,30 +4,31 @@ var sessionServer =new SessionServer()
 
 var sessionConf ={
   
-    "port": 3000
+    "port": 8080
 }
+
 
 sessionServer.init(sessionConf,undefined,(err)=>{
 
     if(err){
 
-        logger.info('session server init failed err:',err.toString())
+        console.info('session server init failed err:',err.toString())
 
         //TODO: process kill
     
     }else{
         
-        logger.info("sessionServer inited")
+        console.info("sessionServer inited")
 
         sessionServer.listen((err)=>{
 
             if(err){
         
-                logger.info('session server listening failed err:',err)
+                console.info('session server listening failed err:',err)
                     //TODO process kill
             }else{
 
-                logger.info("sessionServer listening port ",sessionConf.port)
+                console.info("sessionServer listening port ",sessionConf.port)
                 
             }
             

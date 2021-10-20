@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+var utiles = require('./../../utiles/utiles')
 
 
 function SessionServer(){
@@ -23,15 +24,26 @@ SessionServer.prototype.init = function(conf,server,callback){
 
     var self = this;
 
+    self.conf ={
+        port: conf.port || '8000',
+        host: self.conf.host || utiles.getIP()
+
+    }
+
     if(!server){
         self.server = express()
     }else{
         self.server = server
     }
 
+    self._start()
+    callback(null)
+
 }
 
 SessionServer.prototype._start = function(){
+
+    var self = this;
 
     self.server.use(bodyParser())
 
@@ -40,7 +52,7 @@ SessionServer.prototype._start = function(){
 
     self.server.get('/',function(req,res){
         
-        res.sendFile(FRONTENDPATH+"/views/client2.html");
+        res.sendFile(FRONTENDPATH+"/views/client.html");
     })
 
 }
