@@ -50,9 +50,62 @@ SessionServer.prototype._start = function(){
     var FRONTENDPATH = require('./constants').FRONTENDPATH;
     self.server.use(express.static(FRONTENDPATH))
 
+    self.server.get('/room/:rid/user/:uid',function(req,res){
+
+        if(!req.params.rid||!req.params.uid){
+            
+            var err= new errors.BadRequestError("userID or roomID could not be null")
+
+            throw err
+        }
+
+        // self.sessionManager.retrieveConnectedNode('smoothyRTC',req.params.rid,(sessionData)=>{
+
+            var room ={
+                roomID: req.params.rid,
+                users: [] //users 넣기
+            }
+    
+            res.set("Access-Control-Allow-Origin","*")
+            res.send(
+                {
+                    serverinfo:{
+                        signalServer:{
+                            serverName: "chic-rtc-test-server",
+                            url: "localhost",
+                        },
+                        stunServer: {"url": "stun:stun2.1.google.com:19302" }
+                    },
+                    room :room
+                }
+            )
+        // })
+
+       
+    
+    })
+
     self.server.get('/',function(req,res){
         
         res.sendFile(FRONTENDPATH+"/views/client.html");
+        res.send(
+            {
+                serverinfo:{
+                    signalServer:{
+                        serverName: serverNode.name,
+                        url: utiles.setWSProtocal(serverNode.url,self.conf.ssl)
+                    },
+                    stunServer: {"url": "stun:stun2.1.google.com:19302" },
+                    turnServer:{
+                        url: 'turn:rtc-turn.smoothy-dev.com',
+                        username:"nss",
+                        credential:"nss"
+                    }
+                },
+                room :room
+            }
+        )
+
     })
 
 }
