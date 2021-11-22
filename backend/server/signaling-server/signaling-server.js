@@ -213,7 +213,7 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
                   asyncCallBack(err);
 
                 }else{
-                  self.emit('enterRoom',enteredRoom);  //todo there is ritght
+                  self.emit('enterRoom',enteredRoom,data.fromUserID);  //todo there is ritght
                   asyncCallBack(null);
 
                 }
@@ -230,7 +230,7 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
                 if(err){
                   asyncCallBack(err)
                 }else{
-                  self.emit('enterRoom',createdRoom);  //todo there is ritght
+                  self.emit('createRoom',data.roomID,createdRoom,data.fromUserID);
                   asyncCallBack(null)
                 }
 

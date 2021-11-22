@@ -6,8 +6,7 @@ var errors =require('./errors')
 var users ={};  
 
 const USER_STATUS={
-    INROOM : 'inroom',
-    INVITED : 'invited',
+    INROOM : 'inroom',   
     ONLINE :'online'
 }
 
