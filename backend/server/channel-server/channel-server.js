@@ -44,18 +44,52 @@ ChannelServer.prototype._start = function(){
     self = this;
     signal = this.signal
 
-    signal.on('enterRoom', function(room,userID) {
+    signal.on('enterRoom', function(roomID,room,userID) {
 
+        self.sessionManger.addUserinfo(
+            'chicRTC',roomID,userID
+        ); 
+        
     }); 
 
-    signal.on("createRoom", function(roomID,room,userId) { 
+    signal.on("createRoom", function(roomID,room,userID) { 
 
+        async.parallel(
+            [
+                (asyncCB)=>{
+
+                    self.sessionManger.addUserinfo(
+                        'chicRTC',room.roomID,userID,asyncCB
+                    )
+
+                },
+                (asyncCB)=>{
+                    self.sessionManger.updateServerInfo(
+                        'chicRTC',roomID,self.serverName,asyncCB
+                    ); 
+                }
+                
+            ],
+            (err,result)=>{
+
+                if(err){
+                    //TODO: errHandle
+                }
+                //TODO: something
+            }
+
+        )
 
     })
 
-    signal.on("leaveRoom", function(roomID,room,userId) { 
+    signal.on("leaveRoom", function(roomID,room,userID) { 
 
 
-    
+        self.sessionManger.removeUserinfo(roomID,userID)
+
+        //???: serverinfo를 지울것인가? 말것인가?
+
+
+
     })
 }

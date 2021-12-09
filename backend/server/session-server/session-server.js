@@ -59,11 +59,11 @@ SessionServer.prototype._start = function(){
             throw err
         }
 
-        // self.sessionManager.retrieveConnectedNode('smoothyRTC',req.params.rid,(sessionData)=>{
+        self.sessionManager.retrieveConnectedNode('smoothyRTC',req.params.rid,(sessionData)=>{
 
             var room ={
                 roomID: req.params.rid,
-                users: [] //users 넣기
+                users: [] ||  sessionData.userInfo 
             }
     
             res.set("Access-Control-Allow-Origin","*")
@@ -79,7 +79,7 @@ SessionServer.prototype._start = function(){
                     room :room
                 }
             )
-        // })
+        })
 
        
     
