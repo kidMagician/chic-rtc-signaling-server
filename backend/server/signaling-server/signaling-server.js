@@ -4,7 +4,7 @@ var EventEmitter = require('events').EventEmitter;
 var userModule= require('./user.js');
 var roomModule= require('./room.js');
 var errors = require('./errors')
-var logger =require('../logger').logger
+// var logger =require('../logger').logger
 
 const BROADCASTMESSAGE ={
   ENTER_ROOM:"broadcast:enterRoom",
@@ -64,13 +64,17 @@ SignalingServer.prototype._start = function(){
 
     self.wss.on('connection', function(connection) {
         
-        logger.info("[SignalServer] user connected");
+        // logger.info("[SignalServer] user connected");
+
+        console.info("[SignalServer] user connected");
 
         self.emit('connection',connection)
     
         connection.on('message', function(message) { 
       
-          logger.info("got message",message )  
+          // logger.info("got message",message )  
+
+          console.info("got message",message )
 
           async.waterfall([
             function(asyncCallBack){
@@ -81,7 +85,9 @@ SignalingServer.prototype._start = function(){
       
               parsedMessage = mParsedMessage;
       
-              logger.info("parsedMessage :",parsedMessage)
+              // logger.info("parsedMessage :",parsedMessage)
+
+              console.info("parsedMessage :",parsedMessage)
       
               self.isInvalidMessage(parsedMessage,asyncCallBack)
       
@@ -125,7 +131,7 @@ SignalingServer.prototype.parsingMessage = function(message,callback){
       data = JSON.parse(message); 
 
   } catch (e) { 
-      logger.error("Invalid JSON e:",e); 
+      // logger.error("Invalid JSON e:",e); 
       
       return callback(new errors.InvalidMessageError("Invalid JSON"))
   }
@@ -142,7 +148,7 @@ SignalingServer.prototype.handleSessionMessage = function(parsedMessage,connecti
   switch (data.type) {
     case SESSION_MESSAGE.LOGIN:
 
-      logger.info("try login ",data.fromUserID)
+      // logger.info("try login ",data.fromUserID)
       
       userModule.createUser(data.fromUserID,connection,(err,success)=>{
 
@@ -164,7 +170,7 @@ SignalingServer.prototype.handleSessionMessage = function(parsedMessage,connecti
     break;
     case SESSION_MESSAGE.LOGOUT:
             
-      logger.info(data.fromUserID ," logout");
+      // logger.info(data.fromUserID ," logout");
       
       userModule.deleteUser(data.fromUserID)
 
@@ -196,7 +202,9 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
     
     case ROOM_MESSANGE.ENTER_ROOM: 
         
-      logger.info("enter room",data.fromUserID ,data.roomID)
+      //logger.info("enter room",data.fromUserID ,data.roomID)
+
+      console.info("enter room",data.fromUserID ,data.roomID)
 
       async.waterfall([
         function(asyncCallBack){
@@ -205,7 +213,9 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
         },
         function(isRoom,asyncCallBack){
             if(isRoom){
-              logger.info("enterRoom")
+              // logger.info("enterRoom")
+
+              console.info("enterRoom")
 
               roomModule.enterRoom(data.roomID,data.fromUserID,(err,enteredRoom)=>{
                 if(err){
@@ -223,7 +233,7 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
             }else{
 
               
-              logger.info("createRoom("+ data.roomID+")")
+              // logger.info("createRoom("+ data.roomID+")")
 
               roomModule.createRoom(data.roomID,data.fromUserID,(err,createdRoom)=>{
                 
@@ -240,7 +250,9 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
         }],function(err){
           if(err){
 
-            logger.error(err.toString())
+            // logger.error(err.toString())
+
+            console.error(err.toString())
             callback(err)
             
           }else{
@@ -280,7 +292,7 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
     break;
     case ROOM_MESSANGE.LEAVE_ROOM: 
     
-      logger.info(data.fromUserID ," leave from",data.roomID);
+      // logger.info(data.fromUserID ," leave from",data.roomID);
       
       roomModule.leaveRoom(data.fromUserID,data.roomID,(err)=>{
 
@@ -324,7 +336,7 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
 
     case NEGOTIATION_MESSAGE.OFFER:
   
-      logger.info("Sending offer from ", data.fromUserID,"to ",data.toUserID);
+      // logger.info("Sending offer from ", data.fromUserID,"to ",data.toUserID);
     
       userModule.sendTo(data.toUserID, { 
         fromUserID: data.fromUserID,
@@ -340,7 +352,7 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
 
     case NEGOTIATION_MESSAGE.ANSWER: 
 
-      logger.info("Sending answer from ",data.fromUserID ," to ",data.toUserID); 
+      // logger.info("Sending answer from ",data.fromUserID ," to ",data.toUserID); 
 
       userModule.sendTo(data.toUserID, { 
         fromUserID: data.fromUserID,
@@ -356,7 +368,7 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
     
     case NEGOTIATION_MESSAGE.CANDIDATE: 
       
-      logger.info("Sending candidate from",data.fromUserID," to ", data.toUserID); 
+      // logger.info("Sending candidate from",data.fromUserID," to ", data.toUserID); 
 
       userModule.sendTo(data.toUserID, { 
         fromUserID: data.fromUserID,
@@ -372,7 +384,7 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
 
     default: 
 
-      logger.error("send Invalide Message err to ",data.fromUserID )
+      // logger.error("send Invalide Message err to ",data.fromUserID )
       userModule.sendTo(data.fromUserID, { 
           type: ERR_MESSAGE.INVALIDMESSAGE, 
           message: "sending Invalid Message type:" + data.type 
@@ -397,14 +409,14 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
 
 SignalingServer.prototype.closeConnection = function(connection){
 
-  logger.info("ws client connection close")
+  // logger.info("ws client connection close")
 
   var self = this;
   
   userModule.findUserFromConnection(connection,(err,isUser,userID)=>{
     
     if(err){
-      logger.error(err)  //err shuld not be happen
+      // logger.error(err)  //err shuld not be happen
     }
 
     if(isUser){
@@ -419,25 +431,25 @@ SignalingServer.prototype.closeConnection = function(connection){
 
 SignalingServer.prototype.closeConnectionWithUserID = function(userID){
 
-  logger.info('ws client connection close userID:' + userID)
+  // logger.info('ws client connection close userID:' + userID)
 
   var self = this
   
   userModule.isInRoom(userID,(err,isRoom,roomID)=>{
 
     if(err){
-      logger.error(err)
+      // logger.error(err)
       throw err
     }
 
     if(isRoom){
 
-      logger.info(userID ,"leaveRoom from " ,roomID)
+      // logger.info(userID ,"leaveRoom from " ,roomID)
 
       roomModule.leaveRoom(userID,roomID,(err)=>{
         
         if(err){
-          logger.error(err)             // this err never happen. if this happen, server have to die
+          // logger.error(err)             // this err never happen. if this happen, server have to die
           throw err
         }else{
 
@@ -452,7 +464,7 @@ SignalingServer.prototype.closeConnectionWithUserID = function(userID){
 
             roomModule.broadcast(userID,roomID,broadcastMessage,(err)=>{
               if(err){
-                logger.error(err);
+                // logger.error(err);
                 throw err
               }
             
@@ -467,3 +479,5 @@ SignalingServer.prototype.closeConnectionWithUserID = function(userID){
   userModule.deleteUser(userID)
 
 }
+
+module.exports.SignalingServer= SignalingServer

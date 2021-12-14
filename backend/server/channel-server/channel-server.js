@@ -1,3 +1,20 @@
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
+var utiles = require('./../../utiles/utiles')
+var SessionManager = require('../session-manager/session-manager').SessionManager
+
+function ChannelServer(){
+
+    this.conf={};
+    this.server
+
+
+    EventEmitter.call(this);
+
+}
+
+util.inherits(ChannelServer, EventEmitter);
+
 ChannelServer.prototype.init =function(conf,signalingServer,callback){
 
     this.conf ={
@@ -93,3 +110,7 @@ ChannelServer.prototype._start = function(){
 
     })
 }
+
+
+
+module.exports.ChannelServer = ChannelServer

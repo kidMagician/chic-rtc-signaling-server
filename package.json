@@ -9,6 +9,10 @@
   "author": "nss",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
+    "async": "^3.2.2",
+    "express": "^4.17.1",
+    "redis": "^4.0.0",
+    "redis-shard": "^0.3.0",
+    "ws": "^8.3.0"
   }
 }
