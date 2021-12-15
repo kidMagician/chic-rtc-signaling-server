@@ -1,12 +1,12 @@
 var SessionServer = require('./backend/server/session-server/session-server').SessionServer
 var ChannelServer = require('./backend/server/channel-server/channel-server').ChannelServer
 
-// var sessionServer =new SessionServer()
+var sessionServer =new SessionServer()
 
-// var sessionConf ={
+var sessionConf ={
   
-//     "port": 8080
-// }
+    "port": 8080
+}
 
 
 // sessionServer.init(sessionConf,undefined,(err)=>{
@@ -76,12 +76,12 @@ signalingServer.init(wss,(err)=>{
 
         if(err){
 
-            console.log('channel server init failed err:',err.toString())
-            // logger.info('channel server init failed err:',err.toString())
+            logger.info('channel server init failed err:',err.toString())
 
         }else{
-            console.log("channel server inited port" ,wsPort )
-            // logger.info("channel server inited port" ,wsPort )
+           
+            logger.info("channel server inited port" ,wsPort )
+            
         }
 
     });

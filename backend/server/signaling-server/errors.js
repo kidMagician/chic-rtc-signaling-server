@@ -1,6 +1,6 @@
 var util = require('util')
 var userModule = require('./user')
-// var logger = require('../logger').logger
+var logger = require('../logger').logger
 
 const ERR_TYPE ={
     INVALIDMESSAGE: "err:invalidMessage",
@@ -27,7 +27,7 @@ SignalingServerError.prototype.sendErrMessage = function(conn){
         message: this.message
     }
     
-    // logger.info("send errMessage",message)
+    logger.info("send errMessage",message)
 
     try{
         conn.send(JSON.stringify(message))
@@ -45,12 +45,12 @@ SignalingServerError.prototype.sendErrMessagewithUserID = function(userID){
         message: this.message
     }
     
-    // logger.info(
-    //     "send errMessage \n"
-    //     +"userID: ", +userID
-    //     +"message: ", message
+    logger.info(
+        "send errMessage \n"
+        +"userID: ", +userID
+        +"message: ", message
 
-    // )
+    )
 
     userModule.sendTo(userID,message,(err)=>{
         

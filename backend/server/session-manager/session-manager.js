@@ -2,7 +2,7 @@ var events = require('events'),
   util = require('util'),
   RedisManager = require('./redis-manager');
 const { Module } = require('module');
-  // logger =require('../logger').logger
+  logger =require('../logger').logger
 
 
 var SessionManager = exports.SessionManager = function (config, callback) {
@@ -26,13 +26,13 @@ var SessionManager = exports.SessionManager = function (config, callback) {
   this.redisClient.on("error", function (err) {
 
     console.error("Redis error encountered : " + err);
-    // logger.error("Redis error encountered : " + err);
+    logger.error("Redis error encountered : " + err);
   });
 
   this.redisClient.on("end", function (err) {
 
     console.warn("Redis connection closed" );
-    // logger.warn("Redis connection closed");
+    logger.warn("Redis connection closed");
     if (callback) callback('ERR-REDIS', 'failed to connect to Redis server(s). ');
   });
 
@@ -260,7 +260,7 @@ SessionManager.prototype.removeAll = function (app, server,callback) {
       return; //TODO: errHandle
     }
 
-    // logger.debug(JSON.stringify(results));
+    logger.debug(JSON.stringify(results));
     console.log(JSON.stringify(results));
     var roomIDs =results;
 
