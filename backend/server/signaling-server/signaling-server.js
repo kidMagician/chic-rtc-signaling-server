@@ -64,14 +64,13 @@ SignalingServer.prototype._start = function(){
 
     self.wss.on('connection', function(connection) {
         
-        logger.info("[SignalServer] user connected");
+        logger.info("[SignalServer] user connected" );
 
         self.emit('connection',connection)
     
         connection.on('message', function(message) { 
       
           logger.info("got message",message )  
-
 
           async.waterfall([
             function(asyncCallBack){
@@ -83,8 +82,6 @@ SignalingServer.prototype._start = function(){
               parsedMessage = mParsedMessage;
       
               logger.info("parsedMessage :",parsedMessage)
-
-              console.info("parsedMessage :",parsedMessage)
       
               self.isInvalidMessage(parsedMessage,asyncCallBack)
       
@@ -145,7 +142,6 @@ SignalingServer.prototype.handleSessionMessage = function(parsedMessage,connecti
   switch (data.type) {
     case SESSION_MESSAGE.LOGIN:
 
-      logger.info("try login ",data.fromUserID)
       
       userModule.createUser(data.fromUserID,connection,(err,success)=>{
 
@@ -159,9 +155,11 @@ SignalingServer.prototype.handleSessionMessage = function(parsedMessage,connecti
           success: success
         }
 
+        logger.info("successfully login ",data.fromUserID)
+
         connection.send(JSON.stringify(message));
 
-        // self.emit()
+        self.emit()
       });
 
     break;
@@ -180,12 +178,102 @@ SignalingServer.prototype.handleSessionMessage = function(parsedMessage,connecti
 
       connection.send(JSON.stringify(message));
       
-      //self(emit)
+      self(emit)
 
     break;
   }
 
   callback(null)
+  
+}
+
+SignalingServer.prototype.isInvalidMessage =function(parsedMessage,callback){
+  
+  data = parsedMessage
+
+  if(!data.type){
+    
+    return callback(new errors.InvalidMessageError("type undefiend"))
+  } 
+
+  switch (data.type) {
+
+    case SESSION_MESSAGE.LOGIN:
+      if(!data.fromUserID){
+
+        return callback(new errors.InvalidMessageError("fromUserID undefiend"))
+
+      }
+
+    break
+
+    case SESSION_MESSAGE.LOGOUT:
+      if(!data.fromUserID){
+
+        return callback(new errors.InvalidMessageError("fromUserID undefiend"))
+
+      }
+
+    break
+
+    case ROOM_MESSANGE.ENTER_ROOM:
+      if(!data.fromUserID || !data.roomID){
+
+        return callback(new errors.InvalidMessageError("fromUserID or roomID undefiend"))
+
+      }
+
+    break
+
+    case ROOM_MESSANGE.LEAVE_ROOM:
+
+      if(!data.fromUserID || !data.roomID){
+
+        return callback(new errors.InvalidMessageError("fromUserID or roomID undefiend"))
+
+      }
+
+    break
+
+    case NEGOTIATION_MESSAGE.OFFER:
+
+      if(!data.fromUserID || !data.toUserID || !data.sdp){
+
+        return callback(new errors.InvalidMessageError("fromUserID or toUserID or offer undefiend"))
+
+      }
+
+    break
+
+    case NEGOTIATION_MESSAGE.ANSWER:
+
+      if(!data.fromUserID || !data.toUserID|| !data.sdp){
+
+        return callback(new errors.InvalidMessageError("fromUserID or toUserID or answer undefiend"))
+
+      }
+
+    break;
+
+    case NEGOTIATION_MESSAGE.CANDIDATE:
+
+    if(!data.fromUserID || !data.candidate || !data.toUserID){
+
+      return callback(new errors.InvalidMessageError("fromUserID or toUserID or candidate undefiend"))
+
+    }
+
+    break;
+
+    default:
+
+      return callback(new errors.InvalidMessageError("invalid Type type: " +data.type))
+
+    break;
+
+  }
+    
+  return callback(null)
   
 }
 
@@ -201,8 +289,6 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
         
       logger.info("enter room",data.fromUserID ,data.roomID)
 
-      console.info("enter room",data.fromUserID ,data.roomID)
-
       async.waterfall([
         function(asyncCallBack){
           roomModule.isRoom(data.roomID,asyncCallBack)
@@ -212,15 +298,13 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
             if(isRoom){
               logger.info("enterRoom")
 
-              console.info("enterRoom")
-
               roomModule.enterRoom(data.roomID,data.fromUserID,(err,enteredRoom)=>{
                 if(err){
 
                   asyncCallBack(err);
 
                 }else{
-                  self.emit('enterRoom',enteredRoom,data.fromUserID);  //todo there is ritght
+                  self.emit('enterRoom',enteredRoom,data.fromUserID);  
                   asyncCallBack(null);
 
                 }
@@ -249,7 +333,6 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
 
             logger.error(err.toString())
 
-            console.error(err.toString())
             callback(err)
             
           }else{
@@ -394,15 +477,6 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
 
 }
 
-SignalingServer.prototype.isInvalidMessage =function(parsedMessage,callback){
-}
-
-SignalingServer.prototype.handleSessionMessage = function(parsedMessage,connection,callback){
-}
-
-SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
-}
-
 
 SignalingServer.prototype.closeConnection = function(connection){
 
@@ -475,6 +549,18 @@ SignalingServer.prototype.closeConnectionWithUserID = function(userID){
 
   userModule.deleteUser(userID)
 
+}
+
+SignalingServer.prototype.whatType = function(type){
+
+  var mType 
+
+  var splitVar =type.split(":")
+  
+  mType =splitVar[0]
+
+  return mType
+  
 }
 
 module.exports.SignalingServer= SignalingServer

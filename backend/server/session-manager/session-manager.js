@@ -2,7 +2,8 @@ var events = require('events'),
   util = require('util'),
   RedisManager = require('./redis-manager');
 const { Module } = require('module');
-  logger =require('../logger').logger
+const  logger  = require('../logger').logger
+
 
 
 var SessionManager = exports.SessionManager = function (config, callback) {
@@ -25,20 +26,21 @@ var SessionManager = exports.SessionManager = function (config, callback) {
 
   this.redisClient.on("error", function (err) {
 
-    console.error("Redis error encountered : " + err);
     logger.error("Redis error encountered : " + err);
   });
 
   this.redisClient.on("end", function (err) {
 
-    console.warn("Redis connection closed" );
     logger.warn("Redis connection closed");
     if (callback) callback('ERR-REDIS', 'failed to connect to Redis server(s). ');
   });
 
   this.redisClient.once("connect", function () {
+
+    logger.info("successfully redis connected")
     if (callback) callback(null);
   });
+
 };
 
 util.inherits(SessionManager, events.EventEmitter);
@@ -183,7 +185,22 @@ SessionManager.prototype.addUserinfo == function (app, roomID, userId, callback)
 
   var ukey =userId
 
-  self.redisClient.sadd(roomID,ukey,callback)
+  self.redisClient.sadd(roomID,ukey,(err,result)=>{
+
+    if(err){
+      callback(err)
+
+      return
+    }
+
+    logger.info(
+      "successfully add userInfo(set) in redis"+
+      `{${roomID}:${userId}}`
+    )
+
+    return callback()
+
+  })
 
   return;
 }
@@ -192,7 +209,22 @@ SessionManager.prototype.updateServerInfo == function (app, roomID, server, call
 
   var skey = server;
 
-  self.redisClient.set(roomID,skey,callback);
+  self.redisClient.set(roomID,skey,callback,(err,result)=>{
+
+    if(err){
+      callback(err)
+
+      return
+    }
+
+    logger.info(
+      "successfully set serverinfo(strings) in redis"+
+      `{${roomID}:${skey}}`
+    )
+
+    return callback()
+
+  });
 
   return;
 }
