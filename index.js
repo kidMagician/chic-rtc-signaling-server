@@ -3,12 +3,16 @@ var ChannelServer = require('./backend/server/channel-server/channel-server').Ch
 
 const logger = require('./backend/server/logger').logger
 
-var sessionServer =new SessionServer()
+// var sessionServer =new SessionServer()
 
-var sessionConf ={
+// var sessionConf ={
   
-    "port": 8080
-}
+//     "port": 8888,
+//     "redis": {
+//         host:"127.0.0.1",
+//         port:"6379"
+//     },
+// }
 
 
 // sessionServer.init(sessionConf,undefined,(err)=>{

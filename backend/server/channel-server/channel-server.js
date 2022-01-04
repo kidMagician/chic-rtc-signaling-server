@@ -3,6 +3,7 @@ var util = require('util');
 var utiles = require('./../../utiles/utiles')
 var SessionManager = require('../session-manager/session-manager').SessionManager
 var async = require('async')
+const  logger  = require('../logger').logger
 
 function ChannelServer(){
 
@@ -36,17 +37,17 @@ ChannelServer.prototype.init =function(conf,signalingServer,callback){
         if (!err) {
 
             logger.info(' (init) REDIS     is connected  (for session data)');
-            parallelCallback(null)
+            callback(null)
         }else{
             logger.info(' (init) REDIS     is connect faild  (for session data) \n err:',err.toString());
-            parallelCallback(err);
+            callback(err);
         }
           
     })
 
     process.on('uncaughtException', function(error) {
-        logger.info("uncaughtException....")
-        self.sessionManger.removeAll("smoothyRTC",self.serverName,(err)=>{
+        logger.info("channel uncaughtException.... "+ error.toString())
+        self.sessionManger.removeAll("chicRTC",self.serverName,(err)=>{
             process.nextTick(function() { process.exit(1) })
         })
 

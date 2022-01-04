@@ -1,12 +1,13 @@
 var express = require('express');
 
 var bodyParser = require('body-parser');
+var SessionManager = require("../session-manager/session-manager").SessionManager
 
 
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var utiles = require('./../../utiles/utiles')
-
+const  logger  = require('../logger').logger
 
 function SessionServer(){
 
@@ -26,7 +27,8 @@ SessionServer.prototype.init = function(conf,server,callback){
 
     self.conf ={
         port: conf.port || '8000',
-        host: self.conf.host || utiles.getIP()
+        host: self.conf.host || utiles.getIP(),
+        redis: conf.redis
 
     }
 
@@ -36,7 +38,20 @@ SessionServer.prototype.init = function(conf,server,callback){
         self.server = server
     }
 
-    self._start()
+    self.sessionManager =new SessionManager(self.conf.redis,function (err) {
+        if (!err) {
+            logger.info(' (init) REDIS is connected');
+
+            self._start()
+
+            callback(null);
+        }else{
+            callback(err);  //TODO:  Callback was already called err 
+        }
+        
+    });
+
+    
     callback(null)
 
 }
@@ -59,12 +74,14 @@ SessionServer.prototype._start = function(){
             throw err
         }
 
-        self.sessionManager.retrieveConnectedNode('smoothyRTC',req.params.rid,(sessionData)=>{
+        self.sessionManager.retrieveConnectedNode('chicRTC',req.params.rid,(sessionData)=>{
 
             var room ={
                 roomID: req.params.rid,
                 users: [] ||  sessionData.userInfo 
             }
+
+            var serverNode
     
             res.set("Access-Control-Allow-Origin","*")
             res.send(
@@ -88,23 +105,6 @@ SessionServer.prototype._start = function(){
     self.server.get('/',function(req,res){
         
         res.sendFile(FRONTENDPATH+"/views/client.html");
-        res.send(
-            {
-                serverinfo:{
-                    signalServer:{
-                        serverName: serverNode.name,
-                        url: utiles.setWSProtocal(serverNode.url,self.conf.ssl)
-                    },
-                    stunServer: {"url": "stun:stun2.1.google.com:19302" },
-                    turnServer:{
-                        url: 'turn:rtc-turn.smoothy-dev.com',
-                        username:"nss",
-                        credential:"nss"
-                    }
-                },
-                room :room
-            }
-        )
 
     })
 

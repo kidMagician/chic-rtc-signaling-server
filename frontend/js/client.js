@@ -155,9 +155,9 @@ function getChannelinfo(userID,roomID,callback) {
       var url
 
       if(window.location.protocol =='https:'){
-            url= 'https://rtc-session.smoothy-dev.com/room/'+roomID+'/user/'+userID +'/nationcode/kor' 
+            url= 'https://rtc-session.smoothy-dev.com/room/'+roomID+'/user/'+userID //+'/nationcode/kor' 
       }else{
-            url= 'http://127.0.0.1:8000/room/'+roomID+'/user/'+userID + '/nationcode/kor'
+            url= 'http://127.0.0.1:8080/room/'+roomID+'/user/'+userID //+ '/nationcode/kor'
       }
 
       httpRequest.open('GET',url ,true);

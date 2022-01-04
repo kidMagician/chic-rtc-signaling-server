@@ -5,7 +5,6 @@ const { Module } = require('module');
 const  logger  = require('../logger').logger
 
 
-
 var SessionManager = exports.SessionManager = function (config, callback) {
 
   this.conf = {};
@@ -283,7 +282,7 @@ SessionManager.prototype.removeAll = function (app, server,callback) {
 
   var self = this;
   
-  var skey = Constants.SMOOTHY_CONNECTION + ':' + app + ':' + server;
+  var skey = server;
 
   this.redisClient.smembers(skey,(err,results)=>{
     
