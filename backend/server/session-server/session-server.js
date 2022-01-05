@@ -121,7 +121,7 @@ SessionServer.prototype.listen = function(callback){
     try{
         if(!this.conf.ssl){
 
-            this.server.listen(this.conf.port)
+            this.server.listen(this.conf.port,(callback))
         }else{
 
             var https = require('https')
@@ -130,11 +130,13 @@ SessionServer.prototype.listen = function(callback){
                 cert: this.conf.ssl.cert
             };
     
-            https.createServer(options,this.server).listen(this.conf.port)
+            https.createServer(options,this.server).listen(this.conf.port,callback)
 
         }
 
         logger.info("sessionServer listening port ",this.conf.port)
+
+        //CHECK: try catch working??
 
     }catch(exception){
 

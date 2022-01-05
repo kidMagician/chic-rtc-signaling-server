@@ -20,7 +20,7 @@ sessionServer.init(sessionConf,undefined,(err)=>{
     if(err){
 
         //TODO: process kill
-        console.log("test")
+      
     
     }else{
 

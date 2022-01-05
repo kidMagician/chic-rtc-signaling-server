@@ -26,6 +26,7 @@ var SessionManager = exports.SessionManager = function (config, callback) {
   this.redisClient.on("error", function (err) {
 
     logger.error("Redis error encountered : " + err);
+    if (callback) callback("Redis error encountered :" +err);
   });
 
   this.redisClient.on("end", function (err) {
@@ -192,9 +193,10 @@ SessionManager.prototype.addUserinfo == function (app, roomID, userId, callback)
       return
     }
 
-    logger.info(
-      "successfully add userInfo(set) in redis"+
-      `{${roomID}:${userId}}`
+    logger.debug(
+      "successfully add userInfo(set) in redis "+
+      `\n{${roomID}:${userId}}` +
+      `\nroomID: ${roomId}, userId: ${userId}`
     )
 
     return callback()
@@ -216,9 +218,10 @@ SessionManager.prototype.updateServerInfo == function (app, roomID, server, call
       return
     }
 
-    logger.info(
+    logger.debug(
       "successfully set serverinfo(strings) in redis"+
-      `{${roomID}:${skey}}`
+      `{${roomID}:${skey}}` +
+      `\nroomID: ${roomId}, userId: ${userId}`
     )
 
     return callback()
@@ -242,7 +245,24 @@ SessionManager.prototype.updateServerInfo == function (app, roomID, server, call
 
 SessionManager.prototype.removeUserinfo =function(app,roomID,userID){
 
-  self.redisClient.srem(roomID,userID) //TODO: errhandle
+  self.redisClient.srem(roomID,userID,(err,result)=>{
+
+    if(err){
+      
+      return callback(err) //TODO: add err message 
+    }
+
+    logger.debug(
+      "successfully remove userinfo(strings) in redis"+
+      `{${roomID}:${userID}}` +
+      `\nroomID: ${roomId}, userId: ${userID}`
+    )
+
+    return callback()
+
+  });
+
+    //TODO: errhandle
 
   return;
 
@@ -255,6 +275,7 @@ SessionManager.prototype.removeAllUserinfo =function(app,roomID){
   this.redisClient.smembers(roomIDs,(err,result)=>{
 
     if(err){
+
       //TODO: errHandle
     }
 

@@ -34,14 +34,11 @@ ChannelServer.prototype.init =function(conf,signalingServer,callback){
     var self = this
 
     self.sessionManger = new SessionManager(self.conf.redis,(err)=>{
-        if (!err) {
-
-            logger.info(' (init) REDIS     is connected  (for session data)');
-            callback(null)
-        }else{
-            logger.info(' (init) REDIS     is connect faild  (for session data) \n err:',err.toString());
+        if (err) {
             callback(err);
         }
+
+        callback(null)
           
     })
 
@@ -54,6 +51,8 @@ ChannelServer.prototype.init =function(conf,signalingServer,callback){
     })
 
     self._start()
+
+    logger.info("chennel server successfully inited")
     callback(null)
 }
 
@@ -106,9 +105,6 @@ ChannelServer.prototype._start = function(){
         self.sessionManger.removeUserinfo(roomID,userID)
 
         //???: serverinfo를 지울것인가? 말것인가?
-
-
-
     })
 }
 

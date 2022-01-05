@@ -51,6 +51,8 @@ SignalingServer.prototype.init = function(wss,callback){
 
         this._start()
 
+        logger.info("signaling server successfully inited")
+
         callback(null)
 
     }else{
