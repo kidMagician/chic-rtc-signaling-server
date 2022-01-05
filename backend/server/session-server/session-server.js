@@ -40,19 +40,25 @@ SessionServer.prototype.init = function(conf,server,callback){
 
     self.sessionManager =new SessionManager(self.conf.redis,function (err) {
         if (!err) {
-            logger.info(' (init) REDIS is connected');
 
             self._start()
 
+            logger.info(
+                "sessionServer sucessfully inited "+
+                "\nconf:" +JSON.stringify(self.conf)
+            )
+
             callback(null);
         }else{
+
+            logger.info('session server init failed err:',err.toString())
+
+            
             callback(err);  //TODO:  Callback was already called err 
         }
         
     });
 
-    
-    callback(null)
 
 }
 
@@ -128,8 +134,12 @@ SessionServer.prototype.listen = function(callback){
 
         }
 
+        logger.info("sessionServer listening port ",this.conf.port)
+
     }catch(exception){
-        logger.error(exception)
+
+        console.info('session server listening failed err:',exception)
+        
         return callback(exception)
     }
 

@@ -3,46 +3,44 @@ var ChannelServer = require('./backend/server/channel-server/channel-server').Ch
 
 const logger = require('./backend/server/logger').logger
 
-// var sessionServer =new SessionServer()
+var sessionServer =new SessionServer()
 
-// var sessionConf ={
+var sessionConf ={
   
-//     "port": 8888,
-//     "redis": {
-//         host:"127.0.0.1",
-//         port:"6379"
-//     },
-// }
+    "port": 8888,
+    "redis": {
+        host:"127.0.0.1",
+        port:"6379"
+    },
+}
 
 
-// sessionServer.init(sessionConf,undefined,(err)=>{
+sessionServer.init(sessionConf,undefined,(err)=>{
 
-//     if(err){55
+    if(err){
 
-//         console.info('session server init failed err:',err.toString())
-
-//         //TODO: process kill
+        //TODO: process kill
+        console.log("test")
     
-//     }else{
+    }else{
+
+        sessionServer.listen((err)=>{
+
+            if(err){
         
-//         console.info("sessionServer inited")
+                    //TODO process kill
+            }else{
 
-//         sessionServer.listen((err)=>{
-
-//             if(err){
-        
-//                 console.info('session server listening failed err:',err)
-//                     //TODO process kill
-//             }else{
-
-//                 console.info("sessionServer listening port ",sessionConf.port)
+               
                 
-//             }
-            
-//         })
-//     }
+            }
 
-// })
+            
+            
+        })
+    }
+
+})
 
 var wsPort = 9000;
 var WebSocketServer = require('ws').Server; 
