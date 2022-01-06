@@ -7,7 +7,7 @@ var sessionServer =new SessionServer()
 
 var sessionConf ={
   
-    "port": 8888,
+    "port": 8080,
     "redis": {
         host:"127.0.0.1",
         port:"6379"
@@ -27,15 +27,10 @@ sessionServer.init(sessionConf,undefined,(err)=>{
         sessionServer.listen((err)=>{
 
             if(err){
-        
                     //TODO process kill
             }else{
-
-               
                 
             }
-
-            
             
         })
     }

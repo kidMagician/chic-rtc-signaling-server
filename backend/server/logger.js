@@ -14,7 +14,11 @@ function timeStampFormat() {
 
 var logger = new (winston.Logger)({
     transports: [
-        new (winston.transports.Console)(),
+        new (winston.transports.Console)(
+            {
+                level: 'debug'
+            }
+        ),
         new (require('winston-daily-rotate-file'))({
             name: 'verbose-file',
             filename:  logDir+'/verbose-%DATE%.log',

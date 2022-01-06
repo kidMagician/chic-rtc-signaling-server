@@ -3,6 +3,7 @@ var events = require('events'),
   RedisManager = require('./redis-manager');
 const { Module } = require('module');
 const  logger  = require('../logger').logger
+const async = require('async')
 
 
 var SessionManager = exports.SessionManager = function (config, callback) {
@@ -58,25 +59,25 @@ util.inherits(SessionManager, events.EventEmitter);
 SessionManager.prototype.retrieveConnectedNode = function (app, roomID, callback) {
 
   var serverinfo
-  var roominfo
+  var userInfo
 
   async.parallel(
     [
       (asyncCB)=>{
 
         this.redisClient.smembers(roomID, function (err, res) {
-          roominfo=res
+          userInfo=res
 
-          return;
+          return asyncCB();
         });
 
       },
       (asyncCB)=>{
         this.redisClient.get(roomID, function (err, res) {
 
-          serverinfo=res
+          serverInfo=res
 
-          return;
+          return asyncCB();
         });
 
       }
@@ -87,8 +88,9 @@ SessionManager.prototype.retrieveConnectedNode = function (app, roomID, callback
       }
 
       callback({
-        serverinfo,
-        roominfo
+        userInfo,
+        serverinfo
+        
       })
       
     }
@@ -181,7 +183,9 @@ SessionManager.prototype.retrieveConnectedNode = function (app, roomID, callback
 // };
 
 
-SessionManager.prototype.addUserinfo == function (app, roomID, userId, callback) {
+SessionManager.prototype.addUserinfo = function (app, roomID, userId, callback) {
+
+  var self= this
 
   var ukey =userId
 
@@ -196,18 +200,21 @@ SessionManager.prototype.addUserinfo == function (app, roomID, userId, callback)
     logger.debug(
       "successfully add userInfo(set) in redis "+
       `\n{${roomID}:${userId}}` +
-      `\nroomID: ${roomId}, userId: ${userId}`
+      `\nroomID: ${roomID}, userId: ${userId}`
     )
 
-    return callback()
+    callback()
+
+    return 
 
   })
 
   return;
 }
 
-SessionManager.prototype.updateServerInfo == function (app, roomID, server, callback) {
+SessionManager.prototype.updateServerInfo = function (app, roomID, server, callback) {
 
+  var self =this
   var skey = server;
 
   self.redisClient.set(roomID,skey,callback,(err,result)=>{

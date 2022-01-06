@@ -73,6 +73,8 @@ SessionServer.prototype._start = function(){
 
     self.server.get('/room/:rid/user/:uid',function(req,res){
 
+        logger.debug("[Seeion server] http get params:" +JSON.stringify(req.params))
+
         if(!req.params.rid||!req.params.uid){
             
             var err= new errors.BadRequestError("userID or roomID could not be null")
@@ -80,14 +82,25 @@ SessionServer.prototype._start = function(){
             throw err
         }
 
+
         self.sessionManager.retrieveConnectedNode('chicRTC',req.params.rid,(sessionData)=>{
+            
+            //TODO: sessionData 잘 가져오도록 만들기
+
+            var users =[]
+
+            if(sessionData || sessionData.userInfo){
+
+                users =sessionData.userInfo 
+              
+            }
 
             var room ={
                 roomID: req.params.rid,
-                users: [] ||  sessionData.userInfo 
+                users: users
             }
 
-            var serverNode
+            // var serverNode
     
             res.set("Access-Control-Allow-Origin","*")
             res.send(
@@ -95,7 +108,7 @@ SessionServer.prototype._start = function(){
                     serverinfo:{
                         signalServer:{
                             serverName: "chic-rtc-test-server",
-                            url: "localhost",
+                            url: "ws://localhost:9000",
                         },
                         stunServer: {"url": "stun:stun2.1.google.com:19302" }
                     },
