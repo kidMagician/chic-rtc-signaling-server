@@ -250,7 +250,9 @@ SessionManager.prototype.updateServerInfo = function (app, roomID, server, callb
 
  */
 
-SessionManager.prototype.removeUserinfo =function(app,roomID,userID){
+SessionManager.prototype.removeUserinfo =function(app,roomID,userID,callback){
+  
+  var self= this
 
   self.redisClient.srem(roomID,userID,(err,result)=>{
 
@@ -262,7 +264,7 @@ SessionManager.prototype.removeUserinfo =function(app,roomID,userID){
     logger.debug(
       "successfully remove userinfo(strings) in redis"+
       `{${roomID}:${userID}}` +
-      `\nroomID: ${roomId}, userId: ${userID}`
+      `\nroomID: ${roomID}, userId: ${userID}`
     )
 
     return callback()

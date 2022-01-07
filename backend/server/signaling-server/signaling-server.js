@@ -306,7 +306,7 @@ SignalingServer.prototype.handleMessage = function(parsedMessage,callback){
                   asyncCallBack(err);
 
                 }else{
-                  self.emit('enterRoom',enteredRoom,data.fromUserID);  
+                  self.emit('enterRoom',data.roomID,enteredRoom,data.fromUserID);  
                   asyncCallBack(null);
 
                 }
@@ -526,7 +526,7 @@ SignalingServer.prototype.closeConnectionWithUserID = function(userID){
           throw err
         }else{
 
-          self.emit("leaveRoom",roomID,roomModule.rooms[roomID])
+          self.emit("leaveRoom",roomID,roomModule.rooms[roomID],userID)
 
           if(roomModule.rooms[roomID]){
 

@@ -64,7 +64,9 @@ ChannelServer.prototype._start = function(){
     signal.on('enterRoom', function(roomID,room,userID) {
 
         self.sessionManger.addUserinfo(
-            'chicRTC',roomID,userID
+            'chicRTC',roomID,userID,(err)=>{
+                //TODO: err handle
+            }
         ); 
         
     }); 
@@ -102,7 +104,16 @@ ChannelServer.prototype._start = function(){
     signal.on("leaveRoom", function(roomID,room,userID) { 
 
 
-        self.sessionManger.removeUserinfo(roomID,userID)
+        self.sessionManger.removeUserinfo(
+            'chic-rtc',
+            roomID,
+            userID,
+            (err)=>{
+                if(err){
+                    //TODO: errHandle
+                }
+            }
+        )
 
         //???: serverinfo를 지울것인가? 말것인가?
     })
