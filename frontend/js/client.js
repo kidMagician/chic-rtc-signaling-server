@@ -314,7 +314,7 @@ function handleEnterRoom(){
                   localVideo.srcObject = stream;
                   users.forEach((user,i)=>{
 
-                        var userID = user.userID
+                        var userID = user
                         
                         createRemoteVideo(videoArea,null,(err,remoteVideo)=>{
                               if(err){

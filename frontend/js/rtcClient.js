@@ -1,15 +1,17 @@
 function initRtcPeerClient(iceServers,otherUserID,remoteVideo,callback){
 
 
-    var configuration = {"iceServers": [
-                            // iceServers.stunServer,
-                            iceServers.turnServer
-                            // {
-                            //     url: 'turn:numb.viagenie.ca',
-                            //     "username":"webrtc@live.com",
-                            //     "credential":"webrtc@live.com"
-                            // }
-                      ]}; 
+    var configuration = {
+        // "iceServers": [
+        //                     // iceServers.stunServer,
+        //                     iceServers.turnServer
+        //                     // {
+        //                     //     url: 'turn:numb.viagenie.ca',
+        //                     //     "username":"webrtc@live.com",
+        //                     //     "credential":"webrtc@live.com"
+        //                     // }
+        //               ]
+                    }; 
 
     var conn = new webkitRTCPeerConnection(configuration); 
     

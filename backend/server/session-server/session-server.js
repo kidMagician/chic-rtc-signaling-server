@@ -101,20 +101,25 @@ SessionServer.prototype._start = function(){
             }
 
             // var serverNode
+
+            var responseData ={
+                serverinfo:{
+                    signalServer:{
+                        serverName: "chic-rtc-test-server",
+                        url: "ws://localhost:9000",
+                    },
+                    stunServer: {"url": "stun:stun2.1.google.com:19302" }
+                },
+                room :room
+            }
+
+            logger.debug(
+                "[Seeion server] http get params:" +JSON.stringify(req.params) +
+                "\n response data:" + JSON.stringify(responseData)
+            )
     
             res.set("Access-Control-Allow-Origin","*")
-            res.send(
-                {
-                    serverinfo:{
-                        signalServer:{
-                            serverName: "chic-rtc-test-server",
-                            url: "ws://localhost:9000",
-                        },
-                        stunServer: {"url": "stun:stun2.1.google.com:19302" }
-                    },
-                    room :room
-                }
-            )
+            res.send(responseData)
         })
 
        
