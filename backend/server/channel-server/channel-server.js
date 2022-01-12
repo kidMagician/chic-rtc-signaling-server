@@ -9,6 +9,7 @@ function ChannelServer(){
 
     this.conf={};
     this.server
+    this.serverName
 
     EventEmitter.call(this);
 
@@ -23,7 +24,10 @@ ChannelServer.prototype.init =function(conf,signalingServer,callback){
         port: conf.port || 9090,
 
         redis: conf.redis,
+        
     }
+
+    this.serverName= conf.serverName
 
     if(!signalingServer){
         callback(new Error("websocket cant not be null"))
@@ -64,7 +68,7 @@ ChannelServer.prototype._start = function(){
     signal.on('enterRoom', function(roomID,room,userID) {
 
         self.sessionManger.addUserinfo(
-            'chicRTC',roomID,userID,(err)=>{
+            'CHIC_RTC',roomID,userID,(err)=>{
                 //TODO: err handle
             }
         ); 
@@ -78,13 +82,13 @@ ChannelServer.prototype._start = function(){
                 (asyncCB)=>{
 
                     self.sessionManger.addUserinfo(
-                        'chicRTC',room.roomID,userID,asyncCB
+                        'CHIC_RTC',room.roomID,userID,asyncCB
                     )
 
                 },
                 (asyncCB)=>{
                     self.sessionManger.updateServerInfo(
-                        'chicRTC',roomID,self.serverName,asyncCB
+                        'CHIC_RTC',roomID,self.serverName,asyncCB
                     ); 
                 }
                 
@@ -103,9 +107,8 @@ ChannelServer.prototype._start = function(){
 
     signal.on("leaveRoom", function(roomID,room,userID) { 
 
-
         self.sessionManger.removeUserinfo(
-            'chic-rtc',
+            'CHIC_RTC',
             roomID,
             userID,
             (err)=>{
@@ -115,7 +118,20 @@ ChannelServer.prototype._start = function(){
             }
         )
 
-        //???: serverinfo를 지울것인가? 말것인가?
+        if(!room){
+
+            self.sessionManger.removeServerinfo(
+                'CHIC_RTC',
+                roomID,
+                (err)=>{
+                    if(err){
+                        //TODO: errHandle
+                    }
+                }
+            )
+        }
+
+       
     })
 }
 

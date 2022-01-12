@@ -82,11 +82,8 @@ SessionServer.prototype._start = function(){
             throw err
         }
 
-
-        self.sessionManager.retrieveConnectedNode('chicRTC',req.params.rid,(sessionData)=>{
+        self.sessionManager.retrieveConnectedNode('CHIC_RTC',req.params.rid,(sessionData)=>{
             
-            //TODO: sessionData 잘 가져오도록 만들기
-
             var users =[]
 
             if(sessionData || sessionData.userInfo){

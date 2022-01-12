@@ -68,7 +68,8 @@ signalingServer.init(wss,(err)=>{
         },
         "host": "127.0.0.1",
         "port": wsPort,
-        "ssl": false
+        "ssl": false,
+        "serverName":"testServer"
     }
 
     channelserver.init(channelConf,signalingServer,(err)=>{

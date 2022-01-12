@@ -5,6 +5,12 @@ const { Module } = require('module');
 const  logger  = require('../logger').logger
 const async = require('async')
 
+var Constants = {
+  SERVER_INFO: 'SERVER_INFO',
+  USER_INFO: 'USER_INFO'
+}
+
+
 
 var SessionManager = exports.SessionManager = function (config, callback) {
 
@@ -58,6 +64,9 @@ util.inherits(SessionManager, events.EventEmitter);
  */
 SessionManager.prototype.retrieveConnectedNode = function (app, roomID, callback) {
 
+  var ukey =Constants.USER_INFO +":"+app +":"+ roomID
+  var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
+
   var serverinfo
   var userInfo
 
@@ -65,7 +74,7 @@ SessionManager.prototype.retrieveConnectedNode = function (app, roomID, callback
     [
       (asyncCB)=>{
 
-        this.redisClient.smembers(roomID, function (err, res) {
+        this.redisClient.smembers(ukey, function (err, res) {
           userInfo=res
 
           return asyncCB();
@@ -73,7 +82,7 @@ SessionManager.prototype.retrieveConnectedNode = function (app, roomID, callback
 
       },
       (asyncCB)=>{
-        this.redisClient.get(roomID, function (err, res) {
+        this.redisClient.get(skey, function (err, res) {
 
           serverInfo=res
 
@@ -183,13 +192,13 @@ SessionManager.prototype.retrieveConnectedNode = function (app, roomID, callback
 // };
 
 
-SessionManager.prototype.addUserinfo = function (app, roomID, userId, callback) {
+SessionManager.prototype.addUserinfo = function (app, roomID, userID, callback) {
 
   var self= this
 
-  var ukey =userId
+  var ukey =Constants.USER_INFO +":"+app +":"+ roomID
 
-  self.redisClient.sadd(roomID,ukey,(err,result)=>{
+  self.redisClient.sadd(ukey,userID,(err,result)=>{
 
     if(err){
       callback(err)
@@ -198,9 +207,8 @@ SessionManager.prototype.addUserinfo = function (app, roomID, userId, callback) 
     }
 
     logger.debug(
-      "successfully add userInfo(set) in redis "+
-      `\n{${roomID}:${userId}}` +
-      `\nroomID: ${roomID}, userId: ${userId}`
+      "successfully add userInfo(set) in redis " +
+      `\n key: ${ukey}, value:${userID}` 
     )
 
     callback()
@@ -215,9 +223,9 @@ SessionManager.prototype.addUserinfo = function (app, roomID, userId, callback) 
 SessionManager.prototype.updateServerInfo = function (app, roomID, server, callback) {
 
   var self =this
-  var skey = server;
+  var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
 
-  self.redisClient.set(roomID,skey,callback,(err,result)=>{
+  self.redisClient.set(skey,server,(err,result)=>{
 
     if(err){
       callback(err)
@@ -226,9 +234,8 @@ SessionManager.prototype.updateServerInfo = function (app, roomID, server, callb
     }
 
     logger.debug(
-      "successfully set serverinfo(strings) in redis"+
-      `{${roomID}:${skey}}` +
-      `\nroomID: ${roomId}, userId: ${userId}`
+      "successfully set serverinfo(strings) in redis, "+
+      `key: ${skey}, value: ${server}` 
     )
 
     return callback()
@@ -236,6 +243,34 @@ SessionManager.prototype.updateServerInfo = function (app, roomID, server, callb
   });
 
   return;
+}
+
+
+
+SessionManager.prototype.removeServerinfo = function (app, roomID, callback) {
+
+  var self = this
+  var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
+
+  self.redisClient.del(skey,(err,result)=>{
+
+    if(err){
+      callback(err)
+
+      return
+    }
+
+    logger.debug(
+      "successfully del serverinfo(strings) in redis"+
+      "skey:" +skey 
+    )
+
+    return callback()
+
+  });
+
+  return;
+
 }
 
 
@@ -254,7 +289,9 @@ SessionManager.prototype.removeUserinfo =function(app,roomID,userID,callback){
   
   var self= this
 
-  self.redisClient.srem(roomID,userID,(err,result)=>{
+  var ukey =Constants.USER_INFO +":"+app +":"+ roomID
+
+  self.redisClient.srem(ukey,userID,(err,result)=>{
 
     if(err){
       
@@ -263,8 +300,7 @@ SessionManager.prototype.removeUserinfo =function(app,roomID,userID,callback){
 
     logger.debug(
       "successfully remove userinfo(strings) in redis"+
-      `{${roomID}:${userID}}` +
-      `\nroomID: ${roomID}, userId: ${userID}`
+      `\nkey${ukey}, value: ${userID}` 
     )
 
     return callback()
@@ -279,12 +315,14 @@ SessionManager.prototype.removeUserinfo =function(app,roomID,userID,callback){
 
 SessionManager.prototype.removeAllUserinfo =function(app,roomID){
 
+  var ukey =Constants.USER_INFO +":"+app +":"+ roomID
+
   //대충 코드 짬 다시 짜야함
 
-  this.redisClient.smembers(roomIDs,(err,result)=>{
+  this.redisClient.smembers(ukey,(err,result)=>{
 
     if(err){
-
+      return callback(err)
       //TODO: errHandle
     }
 
@@ -300,13 +338,7 @@ SessionManager.prototype.removeAllUserinfo =function(app,roomID){
 
 }
 
-SessionManager.prototype.removeServerinfo =function(app,roomID){
 
-  self.redisClient.del(roomID,userID) //TODO: errhandle
-
-  return;
-
-}
 
 SessionManager.prototype.removeAll = function (app, server,callback) {
 
