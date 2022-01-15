@@ -1,6 +1,6 @@
 
 
-exports.getIP = function () {
+function getIP() {
 
   var interfaces = require('os').networkInterfaces();
   for (var devName in interfaces) {
@@ -15,7 +15,7 @@ exports.getIP = function () {
   return '0.0.0.0';
 };
 
-exports.setWSProtocal =function(url,wss){
+function setWSProtocal(url:string,wss:string){
   if(wss){
     return 'wss://'+url
   }else{
@@ -26,7 +26,9 @@ exports.setWSProtocal =function(url,wss){
   
 }
 
-exports.getGoogleComputIp =function(hostname){
+function getGoogleComputIp(hostname:string){
 
   return "104.154.203.178"
 }
+
+export {getIP,setWSProtocal,getGoogleComputIp}

@@ -4,14 +4,15 @@ import express,{Express}  from 'express';
 import {SessionManager} from "../session-manager/session-manager"
 
 
-var errors = require('./errors')
-var bodyParser = require('body-parser');
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var utiles = require('../../utiles/utiles')
-const  logger  = require('../logger').logger
+import * as errors  from './errors'
+import bodyParser = require('body-parser');
+// var EventEmitter = require('events').EventEmitter;
+// var util = require('util');
+import * as utiles from '../../utiles/utiles'
+import  LoggerModule  = require('../logger')
+var logger =LoggerModule.logger
 
-export class SessionServer{
+class SessionServer{
 
     conf: {port:string,host:string,redis:{},ssl:{}};
     server: Express;
@@ -27,7 +28,7 @@ export class SessionServer{
 
         self.conf ={
             port: conf.port || '8000',
-            host: self.conf.host || utiles.getIP(),
+            host: utiles.getIP(),
             redis: conf.redis,
             ssl: conf.ssl
         }
@@ -163,10 +164,7 @@ export class SessionServer{
     }
 
 
-    // EventEmitter.call(this);
-
 }
 
-// util.inherits(SessionServer, EventEmitter);
 
-// module.exports.SessionServer = SessionServer
+export {SessionServer}

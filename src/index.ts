@@ -1,6 +1,8 @@
 
-import {SessionServer}  from './backend/server/session-server/session-server' 
+
+import {SessionServer} from './backend/server/session-server/session-server'
 // var ChannelServer = require('./backend/server/channel-server/channel-server').ChannelServer
+
 
 const logger = require('./backend/server/logger').logger
 
@@ -8,15 +10,17 @@ var sessionServer =new SessionServer()
 
 var sessionConf ={
   
-    "port": 8080,
+    "port": '8080',
     "redis": {
         host:"127.0.0.1",
         port:"6379"
     },
+    ssl:{},
+    host:'test'
 }
 
 
-sessionServer.init(sessionConf,undefined,(err)=>{
+sessionServer.init(sessionConf,undefined,(err:any)=>{
 
     if(err){
 
@@ -25,13 +29,13 @@ sessionServer.init(sessionConf,undefined,(err)=>{
     
     }else{
 
-        sessionServer.listen((err)=>{
+        sessionServer.listen(()=>{
 
-            if(err){
-                    //TODO process kill
-            }else{
+            // if(err){
+            //         //TODO process kill
+            // }else{
                 
-            }
+            // }
             
         })
     }
