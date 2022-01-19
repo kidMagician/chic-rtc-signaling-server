@@ -6,7 +6,7 @@ var SessionManager = require("../session-manager/session-manager").SessionManage
 
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-var utiles = require('./../../utiles/utiles')
+var utiles = require('../../utiles/utiles')
 const  logger  = require('../logger').logger
 
 function SessionServer(){
