@@ -20,9 +20,7 @@ function setWSProtocal(url:string,wss:string){
     return 'wss://'+url
   }else{
     return 'ws://'+url
-  }
-  
-  
+  }  
   
 }
 

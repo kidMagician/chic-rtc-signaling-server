@@ -1,9 +1,12 @@
-var events = require('events'),
-  util = require('util')
-var RedisManager = require('./redis-manager').RedisManager;
 
-const  logger  = require('../logger').logger
-const async = require('async')
+import RedisManagerModule = require('./redis-manager')
+
+
+
+import  LoggerModule  = require('../logger')
+var logger =LoggerModule.logger
+
+import * as async from 'async'
 
 var Constants = {
   SERVER_INFO: 'SERVER_INFO',
@@ -11,8 +14,7 @@ var Constants = {
 }
 
 
-
-export class SessionManager  {
+class SessionManager  {
 
   conf : {};
   redisClient:any
@@ -24,9 +26,7 @@ export class SessionManager  {
     
   
     this.redisClient = new RedisManager(this.conf);
-  
-    events.EventEmitter.call(this);
-  
+
     this.redisClient.on("error", function (err:any) {
   
       logger.error("Redis error encountered : " + err);
@@ -109,7 +109,10 @@ export class SessionManager  {
 
 };
 
-util.inherits(SessionManager, events.EventEmitter);
+
+export {
+  SessionManager
+}
 
 
 
