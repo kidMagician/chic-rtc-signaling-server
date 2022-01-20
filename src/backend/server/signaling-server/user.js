@@ -110,7 +110,7 @@ module.exports.findUserFromConnection = function(conn,callback){
         return callback(new errors.InvalidMessageError("connection can not be null"));
     }
 
-    for(userID in users){
+    for(var userID in users){
         if(users[userID].connection ===conn){
 
             return callback(null,true,userID)

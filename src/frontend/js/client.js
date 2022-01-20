@@ -145,7 +145,7 @@ var localVideo = document.querySelector('#localVideo');
 callPage.style.display = "none";
 
 function getChannelinfo(userID,roomID,callback) {
-      httpRequest = new XMLHttpRequest();
+      var httpRequest = new XMLHttpRequest();
   
       if(!httpRequest) {
             console.log('XMLHttpRequest not working')

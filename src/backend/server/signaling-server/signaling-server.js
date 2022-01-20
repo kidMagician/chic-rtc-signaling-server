@@ -74,6 +74,8 @@ SignalingServer.prototype._start = function(){
       
           logger.info("got message",message )  
 
+          var parsedMessage
+
           async.waterfall([
             function(asyncCallBack){
               self.parsingMessage(message,asyncCallBack);
@@ -139,7 +141,7 @@ SignalingServer.prototype.handleSessionMessage = function(parsedMessage,connecti
   
   var self = this
 
-  data = parsedMessage
+  var data = parsedMessage
   
   switch (data.type) {
     case SESSION_MESSAGE.LOGIN:
@@ -191,7 +193,7 @@ SignalingServer.prototype.handleSessionMessage = function(parsedMessage,connecti
 
 SignalingServer.prototype.isInvalidMessage =function(parsedMessage,callback){
   
-  data = parsedMessage
+  var data = parsedMessage
 
   if(!data.type){
     

@@ -8,14 +8,13 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
             "program": "${workspaceFolder}\\build\\index.js",
             "preLaunchTask": "build",
-            "outFiles": [
-                "${workspaceRoot}\\build\\**.js"
+            "ouDir": [
+                "${workspaceRoot}\\build"
             ],
+            
+            "sourceMaps": true,
             "outputCapture": "std",
         }
     ]

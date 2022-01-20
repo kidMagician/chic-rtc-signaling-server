@@ -67,7 +67,7 @@ SessionManager.prototype.retrieveConnectedNode = function (app, roomID, callback
   var ukey =Constants.USER_INFO +":"+app +":"+ roomID
   var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
 
-  var serverinfo
+  var serverInfo
   var userInfo
 
   async.parallel(
@@ -98,7 +98,7 @@ SessionManager.prototype.retrieveConnectedNode = function (app, roomID, callback
 
       callback({
         userInfo,
-        serverinfo
+        serverInfo
         
       })
       
