@@ -11,8 +11,13 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\src\\index.js",
+            "program": "${workspaceFolder}\\build\\index.js",
+            "preLaunchTask": "build",
+            "outFiles": [
+                "${workspaceRoot}\\build\\**.js"
+            ],
             "outputCapture": "std",
         }
     ]
+   
 }

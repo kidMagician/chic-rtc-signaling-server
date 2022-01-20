@@ -62,8 +62,8 @@ ChannelServer.prototype.init =function(conf,signalingServer,callback){
 
 ChannelServer.prototype._start = function(){
     
-    self = this;
-    signal = this.signal
+    var self = this;
+    var signal = this.signal
 
     signal.on('enterRoom', function(roomID,room,userID) {
 

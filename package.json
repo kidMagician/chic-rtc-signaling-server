@@ -4,7 +4,8 @@
   "description": "webrtc signaling server",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src -d build --source-maps"
   },
   "author": "nss",
   "license": "ISC",
@@ -17,5 +18,11 @@
     "winston": "^2.4.5",
     "winston-daily-rotate-file": "^3.10.0",
     "ws": "^8.4.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.16.8",
+    "@babel/core": "^7.16.7",
+    "@babel/node": "^7.16.8",
+    "@babel/preset-env": "^7.16.8"
   }
 }
