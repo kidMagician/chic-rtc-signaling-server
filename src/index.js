@@ -15,7 +15,7 @@ var sessionConf ={
 }
 
 
-sessionServer.init(sessionConf,undefined,(err)=>{
+sessionServer.init(sessionConf,(err)=>{
 
     if(err){
 

@@ -1,7 +1,6 @@
-var events = require('events'),
-  util = require('util'),
-  RedisManager = require('./redis-manager');
-const { Module } = require('module');
+
+var RedisManager = require('./redis-manager');
+
 const  logger  = require('../logger').logger
 const async = require('async')
 
@@ -12,103 +11,283 @@ var Constants = {
 
 
 
-var SessionManager = exports.SessionManager = function (config, callback) {
+class SessionManager{
+  
+  constructor(config, callback) {
 
-  this.conf = {};
+    this.conf = {};
 
-  if (typeof(config) == 'function' && !callback) {
-    callback = config;
+    if (typeof(config) == 'function' && !callback) {
+      callback = config;
 
-    // default configurations
-    // this.conf.expire = 120; // redis expire TTL (seconds)
+      // default configurations
+      // this.conf.expire = 120; // redis expire TTL (seconds)
 
-  } else {
-    if (config) this.conf = config;
-  }
-
-  this.redisClient = new RedisManager(this.conf);
-
-  events.EventEmitter.call(this);
-
-  this.redisClient.on("error", function (err) {
-
-    logger.error("Redis error encountered : " + err);
-    if (callback) callback("Redis error encountered :" +err);
-  });
-
-  this.redisClient.on("end", function (err) {
-
-    logger.warn("Redis connection closed");
-    if (callback) callback('ERR-REDIS', 'failed to connect to Redis server(s). ');
-  });
-
-  this.redisClient.once("connect", function () {
-
-    logger.info("successfully redis connected")
-    if (callback) callback(null);
-  });
-
-};
-
-util.inherits(SessionManager, events.EventEmitter);
-
-
-/**
- * Get the server number according to channel name from redis hash table.
-
- * @name retrieve
- * @function
- * @param {string} app - application key
- * @param {string} channel - channel name
- * @param {callback} callback - callback function
- */
-SessionManager.prototype.retrieveConnectedNode = function (app, roomID, callback) {
-
-  var ukey =Constants.USER_INFO +":"+app +":"+ roomID
-  var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
-
-  var serverInfo
-  var userInfo
-
-  async.parallel(
-    [
-      (asyncCB)=>{
-
-        this.redisClient.smembers(ukey, function (err, res) {
-          userInfo=res
-
-          return asyncCB();
-        });
-
-      },
-      (asyncCB)=>{
-        this.redisClient.get(skey, function (err, res) {
-
-          serverInfo=res
-
-          return asyncCB();
-        });
-
-      }
-    ],(err,results)=>{
-
-      if(err){
-        //TODO: errhanld
-      }
-
-      callback({
-        userInfo,
-        serverInfo
-        
-      })
-      
+    } else {
+      if (config) this.conf = config;
     }
 
-  )
+    this.redisClient = new RedisManager(this.conf);
 
-  return
 
-};
+    this.redisClient.on("error", function (err) {
+
+      logger.error("Redis error encountered : " + err);
+      if (callback) callback("Redis error encountered :" +err);
+    });
+
+    this.redisClient.on("end", function (err) {
+
+      logger.warn("Redis connection closed");
+      if (callback) callback('ERR-REDIS', 'failed to connect to Redis server(s). ');
+    });
+
+    this.redisClient.once("connect", function () {
+
+      logger.info("successfully redis connected")
+      if (callback) callback(null);
+    });
+
+  };
+
+  /**
+   * Get the server number according to channel name from redis hash table.
+
+  * @name retrieve
+  * @function
+  * @param {string} app - application key
+  * @param {string} channel - channel name
+  * @param {callback} callback - callback function
+  */
+  retrieveConnectedNode(app, roomID, callback) {
+
+    var ukey =Constants.USER_INFO +":"+app +":"+ roomID
+    var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
+
+    var serverInfo
+    var userInfo
+
+    async.parallel(
+      [
+        (asyncCB)=>{
+
+          this.redisClient.smembers(ukey, function (err, res) {
+            userInfo=res
+
+            return asyncCB();
+          });
+
+        },
+        (asyncCB)=>{
+          this.redisClient.get(skey, function (err, res) {
+
+            serverInfo=res
+
+            return asyncCB();
+          });
+
+        }
+      ],(err,results)=>{
+
+        if(err){
+          //TODO: errhanld
+        }
+
+        callback({
+          userInfo,
+          serverInfo
+          
+        })
+        
+      }
+
+    )
+
+    return
+
+  };
+
+  addUserinfo(app, roomID, userID, callback) {
+
+  
+    var ukey =Constants.USER_INFO +":"+app +":"+ roomID
+  
+    this.redisClient.sadd(ukey,userID,(err,result)=>{
+  
+      if(err){
+        callback(err)
+  
+        return
+      }
+  
+      logger.debug(
+        "successfully add userInfo(set) in redis " +
+        `\n key: ${ukey}, value:${userID}` 
+      )
+  
+      callback()
+  
+      return 
+  
+    })
+  
+    return;
+  }
+  
+  updateServerInfo(app, roomID, server, callback) {
+
+    var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
+  
+    this.redisClient.set(skey,server,(err,result)=>{
+  
+      if(err){
+        callback(err)
+  
+        return
+      }
+  
+      logger.debug(
+        "successfully set serverinfo(strings) in redis, "+
+        `key: ${skey}, value: ${server}` 
+      )
+  
+      return callback()
+  
+    });
+  
+    return;
+  }
+  
+  
+  
+  removeServerinfo(app, roomID, callback) {
+
+    var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
+  
+    this.redisClient.del(skey,(err,result)=>{
+  
+      if(err){
+        callback(err)
+  
+        return
+      }
+  
+      logger.debug(
+        "successfully del serverinfo(strings) in redis"+
+        "skey:" +skey 
+      )
+  
+      return callback()
+  
+    });
+  
+    return;
+  
+  }
+  
+  
+  /**
+   * Remove server datas from redis hash table
+  
+   * @name remove
+   * @function
+   * @param {string} app - application key
+   * @param {string} roomID - room ID
+   * @param {string} server - server name
+  
+   */
+  
+  removeUserinfo(app,roomID,userID,callback){
+  
+    var ukey =Constants.USER_INFO +":"+app +":"+ roomID
+  
+    this.redisClient.srem(ukey,userID,(err,result)=>{
+  
+      if(err){
+        
+        return callback(err) //TODO: add err message 
+      }
+  
+      logger.debug(
+        "successfully remove userinfo(strings) in redis"+
+        `\nkey${ukey}, value: ${userID}` 
+      )
+  
+      return callback()
+  
+    });
+  
+      //TODO: errhandle
+  
+    return;
+  
+  }
+  
+  removeAllUserinfo(app,roomID){
+  
+    var ukey =Constants.USER_INFO +":"+app +":"+ roomID
+  
+    //대충 코드 짬 다시 짜야함
+  
+    this.redisClient.smembers(ukey,(err,result)=>{
+  
+      if(err){
+        return callback(err)
+        //TODO: errHandle
+      }
+  
+      var memberCount =result
+  
+      for(var i=0; i<memberCount;i++){
+        self.redisClient.spop(roomID) 
+      }
+      
+    })
+  
+    return;
+  
+  }
+  
+  
+  
+  removeAll(app, server,callback) {
+  
+    var self = this;
+    
+    var skey = server;
+  
+    this.redisClient.smembers(skey,(err,results)=>{
+      
+      if(err){
+        
+        return; //TODO: errHandle
+      }
+  
+      logger.debug(JSON.stringify(results));
+      console.log(JSON.stringify(results));
+      var roomIDs =results;
+  
+      roomIDs.forEach((roomID)=>{
+  
+        var hkey = Constants.SMOOTHY_CONNECTION + ':' + app + ':' + roomID;
+        
+        self.redisClient.hdel(hkey,server)
+  
+      })
+  
+      self.redisClient.del(skey)
+  
+      callback(null)
+  
+    });
+  
+  };
+
+}
+
+
+
+
 
 // /**
 //  * Update connection informations into redis server.
@@ -192,187 +371,8 @@ SessionManager.prototype.retrieveConnectedNode = function (app, roomID, callback
 // };
 
 
-SessionManager.prototype.addUserinfo = function (app, roomID, userID, callback) {
 
-  var self= this
 
-  var ukey =Constants.USER_INFO +":"+app +":"+ roomID
-
-  self.redisClient.sadd(ukey,userID,(err,result)=>{
-
-    if(err){
-      callback(err)
-
-      return
-    }
-
-    logger.debug(
-      "successfully add userInfo(set) in redis " +
-      `\n key: ${ukey}, value:${userID}` 
-    )
-
-    callback()
-
-    return 
-
-  })
-
-  return;
-}
-
-SessionManager.prototype.updateServerInfo = function (app, roomID, server, callback) {
-
-  var self =this
-  var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
-
-  self.redisClient.set(skey,server,(err,result)=>{
-
-    if(err){
-      callback(err)
-
-      return
-    }
-
-    logger.debug(
-      "successfully set serverinfo(strings) in redis, "+
-      `key: ${skey}, value: ${server}` 
-    )
-
-    return callback()
-
-  });
-
-  return;
-}
-
-
-
-SessionManager.prototype.removeServerinfo = function (app, roomID, callback) {
-
-  var self = this
-  var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
-
-  self.redisClient.del(skey,(err,result)=>{
-
-    if(err){
-      callback(err)
-
-      return
-    }
-
-    logger.debug(
-      "successfully del serverinfo(strings) in redis"+
-      "skey:" +skey 
-    )
-
-    return callback()
-
-  });
-
-  return;
-
-}
-
-
-/**
- * Remove server datas from redis hash table
-
- * @name remove
- * @function
- * @param {string} app - application key
- * @param {string} roomID - room ID
- * @param {string} server - server name
-
- */
-
-SessionManager.prototype.removeUserinfo =function(app,roomID,userID,callback){
-  
-  var self= this
-
-  var ukey =Constants.USER_INFO +":"+app +":"+ roomID
-
-  self.redisClient.srem(ukey,userID,(err,result)=>{
-
-    if(err){
-      
-      return callback(err) //TODO: add err message 
-    }
-
-    logger.debug(
-      "successfully remove userinfo(strings) in redis"+
-      `\nkey${ukey}, value: ${userID}` 
-    )
-
-    return callback()
-
-  });
-
-    //TODO: errhandle
-
-  return;
-
-}
-
-SessionManager.prototype.removeAllUserinfo =function(app,roomID){
-
-  var ukey =Constants.USER_INFO +":"+app +":"+ roomID
-
-  //대충 코드 짬 다시 짜야함
-
-  this.redisClient.smembers(ukey,(err,result)=>{
-
-    if(err){
-      return callback(err)
-      //TODO: errHandle
-    }
-
-    var memberCount =result
-
-    for(var i=0; i<memberCount;i++){
-      self.redisClient.spop(roomID) 
-    }
-    
-  })
-
-  return;
-
-}
-
-
-
-SessionManager.prototype.removeAll = function (app, server,callback) {
-
-  var self = this;
-  
-  var skey = server;
-
-  this.redisClient.smembers(skey,(err,results)=>{
-    
-    if(err){
-      
-      return; //TODO: errHandle
-    }
-
-    logger.debug(JSON.stringify(results));
-    console.log(JSON.stringify(results));
-    var roomIDs =results;
-
-    roomIDs.forEach((roomID)=>{
-
-      var hkey = Constants.SMOOTHY_CONNECTION + ':' + app + ':' + roomID;
-      
-      self.redisClient.hdel(hkey,server)
-
-    })
-
-    self.redisClient.del(skey)
-
-    callback(null)
-
-  });
-
-};
-
-Module.exports={
+export {
   SessionManager
 }
