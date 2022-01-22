@@ -5,136 +5,136 @@ var SessionManager = require('../session-manager/session-manager').SessionManage
 var async = require('async')
 const  logger  = require('../logger').logger
 
-function ChannelServer(){
+class ChannelServer extends EventEmitter{
 
-    this.conf={};
-    this.server
-    this.serverName
+    constructor(){
 
-    EventEmitter.call(this);
+        super()
+        this.conf={};
+        this.server
+        this.serverName
 
-}
-
-util.inherits(ChannelServer, EventEmitter);
-
-ChannelServer.prototype.init =function(conf,signalingServer,callback){
-
-    this.conf ={
-        host: conf.host || utiles.getIP(),
-        port: conf.port || 9090,
-
-        redis: conf.redis,
-        
     }
 
-    this.serverName= conf.serverName
+    init(conf,signalingServer,callback){
 
-    if(!signalingServer){
-        callback(new Error("websocket cant not be null"))
-    }
+        this.conf ={
+            host: conf.host || utiles.getIP(),
+            port: conf.port || 9090,
 
-    this.signal = signalingServer;
-
-    var self = this
-
-    self.sessionManger = new SessionManager(self.conf.redis,(err)=>{
-        if (err) {
-            callback(err);
+            redis: conf.redis,
+            
         }
 
-        callback(null)
-          
-    })
+        this.serverName= conf.serverName
 
-    process.on('uncaughtException', function(error) {
-        logger.info("channel uncaughtException.... "+ error.toString())
-        self.sessionManger.removeAll("chicRTC",self.serverName,(err)=>{
-            process.nextTick(function() { process.exit(1) })
+        if(!signalingServer){
+            callback(new Error("websocket cant not be null"))
+        }
+
+        this.signal = signalingServer;
+
+        var self = this
+
+        self.sessionManger = new SessionManager(self.conf.redis,(err)=>{
+            if (err) {
+                callback(err);
+            }
+
+            callback(null)
+            
         })
 
-    })
+        process.on('uncaughtException', function(error) {
+            logger.info("channel uncaughtException.... "+ error.toString())
+            self.sessionManger.removeAll("chicRTC",self.serverName,(err)=>{
+                process.nextTick(function() { process.exit(1) })
+            })
 
-    self._start()
+        })
 
-    logger.info("chennel server successfully inited")
-    callback(null)
-}
+        self._start()
 
-ChannelServer.prototype._start = function(){
-    
-    var self = this;
-    var signal = this.signal
+        logger.info("chennel server successfully inited")
+        callback(null)
+    }
 
-    signal.on('enterRoom', function(roomID,room,userID) {
-
-        self.sessionManger.addUserinfo(
-            'CHIC_RTC',roomID,userID,(err)=>{
-                //TODO: err handle
-            }
-        ); 
+    _start(){
         
-    }); 
+        var self = this;
+        var signal = this.signal
 
-    signal.on("createRoom", function(roomID,room,userID) { 
+        signal.on('enterRoom', function(roomID,room,userID) {
 
-        async.parallel(
-            [
-                (asyncCB)=>{
-
-                    self.sessionManger.addUserinfo(
-                        'CHIC_RTC',room.roomID,userID,asyncCB
-                    )
-
-                },
-                (asyncCB)=>{
-                    self.sessionManger.updateServerInfo(
-                        'CHIC_RTC',roomID,self.serverName,asyncCB
-                    ); 
+            self.sessionManger.addUserinfo(
+                'CHIC_RTC',roomID,userID,(err)=>{
+                    //TODO: err handle
                 }
-                
-            ],
-            (err,result)=>{
+            ); 
+            
+        }); 
 
-                if(err){
-                    //TODO: errHandle
+        signal.on("createRoom", function(roomID,room,userID) { 
+
+            async.parallel(
+                [
+                    (asyncCB)=>{
+
+                        self.sessionManger.addUserinfo(
+                            'CHIC_RTC',room.roomID,userID,asyncCB
+                        )
+
+                    },
+                    (asyncCB)=>{
+                        self.sessionManger.updateServerInfo(
+                            'CHIC_RTC',roomID,self.serverName,asyncCB
+                        ); 
+                    }
+                    
+                ],
+                (err,result)=>{
+
+                    if(err){
+                        //TODO: errHandle
+                    }
+                    //TODO: something
                 }
-                //TODO: something
-            }
 
-        )
+            )
 
-    })
+        })
 
-    signal.on("leaveRoom", function(roomID,room,userID) { 
+        signal.on("leaveRoom", function(roomID,room,userID) { 
 
-        self.sessionManger.removeUserinfo(
-            'CHIC_RTC',
-            roomID,
-            userID,
-            (err)=>{
-                if(err){
-                    //TODO: errHandle
-                }
-            }
-        )
-
-        if(!room){
-
-            self.sessionManger.removeServerinfo(
+            self.sessionManger.removeUserinfo(
                 'CHIC_RTC',
                 roomID,
+                userID,
                 (err)=>{
                     if(err){
                         //TODO: errHandle
                     }
                 }
             )
-        }
 
-       
-    })
+            if(!room){
+
+                self.sessionManger.removeServerinfo(
+                    'CHIC_RTC',
+                    roomID,
+                    (err)=>{
+                        if(err){
+                            //TODO: errHandle
+                        }
+                    }
+                )
+            }
+
+        
+        })
+    }
 }
 
 
 
-module.exports.ChannelServer = ChannelServer
+export {ChannelServer}
