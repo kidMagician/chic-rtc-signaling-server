@@ -12,6 +12,7 @@ class ChannelServer extends EventEmitter{
         super()
         this.conf={};
         this.server
+        this.signal
         this.serverName
 
     }
@@ -62,9 +63,9 @@ class ChannelServer extends EventEmitter{
     _start(){
         
         var self = this;
-        var signal = this.signal
+        
 
-        signal.on('enterRoom', function(roomID,room,userID) {
+        this.signal.on('enterRoom', function(roomID,room,userID) {
 
             self.sessionManger.addUserinfo(
                 'CHIC_RTC',roomID,userID,(err)=>{
