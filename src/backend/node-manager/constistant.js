@@ -1,0 +1,1 @@
+exports.BASE_ZNODE_PATH = '/CHIC_RTC';
