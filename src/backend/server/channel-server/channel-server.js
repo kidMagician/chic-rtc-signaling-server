@@ -75,7 +75,7 @@ class ChannelServer extends EventEmitter{
             
         }); 
 
-        signal.on("createRoom", function(roomID,room,userID) { 
+        this.signal.on("createRoom", function(roomID,room,userID) { 
 
             async.parallel(
                 [
@@ -105,7 +105,7 @@ class ChannelServer extends EventEmitter{
 
         })
 
-        signal.on("leaveRoom", function(roomID,room,userID) { 
+        this.signal.on("leaveRoom", function(roomID,room,userID) { 
 
             self.sessionManger.removeUserinfo(
                 'CHIC_RTC',
