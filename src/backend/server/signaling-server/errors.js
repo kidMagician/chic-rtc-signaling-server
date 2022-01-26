@@ -1,6 +1,6 @@
 var util = require('util')
 var userModule = require('./user')
-var logger = require('../logger').logger
+var logger = require('../../logger').logger
 
 const ERR_TYPE ={
     INVALIDMESSAGE: "err:invalidMessage",

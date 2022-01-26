@@ -3,7 +3,7 @@ var util = require('util');
 var utiles = require('./../../utiles/utiles')
 var SessionManager = require('../../session-manager/session-manager').SessionManager
 var async = require('async')
-const  logger  = require('../logger').logger
+const  logger  = require('../../logger').logger
 
 class ChannelServer extends EventEmitter{
 

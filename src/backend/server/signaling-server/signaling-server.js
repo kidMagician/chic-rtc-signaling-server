@@ -4,7 +4,7 @@ var EventEmitter = require('events').EventEmitter;
 var userModule= require('./user.js');
 var roomModule= require('./room.js');
 var errors = require('./errors')
-var logger =require('../logger').logger
+var logger =require('../../logger').logger
 
 const BROADCASTMESSAGE ={
   ENTER_ROOM:"broadcast:enterRoom",

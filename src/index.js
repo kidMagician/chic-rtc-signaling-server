@@ -1,7 +1,7 @@
 var SessionServer = require('./backend/server/session-server/session-server').SessionServer
 var ChannelServer = require('./backend/server/channel-server/channel-server').ChannelServer
 
-const logger = require('./backend/server/logger').logger
+const logger = require('./backend/logger').logger
 
 var sessionServer =new SessionServer()
 

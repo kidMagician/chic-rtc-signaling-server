@@ -4,7 +4,7 @@ var bodyParser = require('body-parser');
 import {SessionManager} from "../../session-manager/session-manager"
 
 var utiles = require('../../utiles/utiles')
-const  logger  = require('../logger').logger
+const  logger  = require('../../logger').logger
 
 class SessionServer{
     

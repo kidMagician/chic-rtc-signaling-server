@@ -1,6 +1,6 @@
 
-var zookeeper = require('node-zookeeper-client'),
-  logger = require('../logger').logger
+var zookeeper = require('node-zookeeper-client')
+  logger = require('../logger').logger,
 
   constants = require('./constants'),
   async = require('async'),
@@ -18,15 +18,10 @@ var zookeeper = require('node-zookeeper-client'),
         this.address = addr || 'localhost:2181';
         this.ready = false;
         this.isWatching = isWatching;
-
-    
-        var self = this;
     
         this.nodeRing = new ConsistentHashing();
-        this.appInfos = {};
         this.servers = {};
         this.serverArray = [];
-        this.appArray = [];
     
         this.connected = false;
         this.connectionTryNum = 0;
@@ -35,14 +30,14 @@ var zookeeper = require('node-zookeeper-client'),
     
         var connectTry = function () {
     
-        if (!self.connected) {
-            if (self.connectionTryNum > 3) {
-            if (callback) callback(new Error('zookeeper - failed to connect to [' + self.address + ']'));
+        if (!this.connected) {
+            if (this.connectionTryNum > 3) {
+            if (callback) callback(new Error('zookeeper - failed to connect to [' + this.address + ']'));
             } else {
     
-            if (self.connectionTryNum > 1) logger.warn(' (init) ZOOKEEPER connection retry ' + (self.connectionTryNum - 1));
-            self.connectionTryNum++;
-            setTimeout(connectTry, 2000);
+            if (this.connectionTryNum > 1) logger.warn(' (init) ZOOKEEPER connection retry ' + (this.connectionTryNum - 1));
+              this.connectionTryNum++;
+              setTimeout(connectTry, 2000);
             }
         }
         };
@@ -57,6 +52,27 @@ var zookeeper = require('node-zookeeper-client'),
     this.zkClient = zookeeper.createClient(this.address, {retries: 2});
   
     this.zkClient.once('connected', function () {
+
+      self.connected = true;
+
+      self._initPath('', function () {
+        self._initPath(constants.SERVERS_PATH, function () {
+          self._initPath(constants.META_PATH, function () {
+            self._initPath(constants.META_PATH + constants.APP_PATH, function () {
+              self._initPath(constants.META_PATH + constants.SESSION_SERVER_PATH, function () {
+
+                if (isWatching) {
+                  self._watchServerNodes();
+                }
+
+                self.ready = true;
+  
+                if (callback) callback();
+              })
+            })
+          })
+        })
+      })
         //TODO: write watching code
     });
   
@@ -214,6 +230,77 @@ var zookeeper = require('node-zookeeper-client'),
       }
     );
   };
+
+  _watchServerNodes(){
+
+  }
 }
+
+NodeManager.prototype._watchServerNodes = function () {
+
+  var self = this;
+  this.zkClient.getChildren(
+    constants.BASE_ZNODE_PATH + constants.SERVERS_PATH,
+    function (event) {
+     
+      self._watchServerNodes();
+    },
+    function (error, children, stat) {
+      if (error) {
+
+        logger.warn('Failed to list children due to: %s.', error);
+        if (error.getCode() == zookeeper.Exception.CONNECTION_LOSS) { // TODO 나중에 좀더 확인이 필요함!
+          self.zkClient.close();
+          self._connect(self.isWatching, function (err) {
+            if (err) logger.error(err);
+          })
+        }
+
+      } else {
+
+        var max = children.length;
+
+        var nodeTask = function (taskId, value, callback) {
+
+          self._getServerNode(children[taskId], function () {
+            taskId++
+            if (taskId < max) {
+              function_array.splice(function_array.length - 1, 0, nodeTask);
+            }
+            callback(null, taskId, ++value);   //TODO callback check
+          });
+        };
+
+        var startTask = function (callback) {
+          self.servers = {};
+          function_array.splice(function_array.length - 1, 0, nodeTask);
+          callback(null, 0, 0);       //TODO callback check
+        };
+
+        var finalTask = function (taskId, value, callback) {
+          callback(null, value);      //TODO callback check
+        };
+
+        var function_array = [startTask, finalTask];
+
+        if (max > 0) {
+
+          logger.info('  [event] server nodes [' + max + '] : ' + children);
+
+          async.waterfall(function_array, function (err, result) {
+            this.serverArray = [];
+            this.serverArray = children;
+            self.nodeRing = new ConsistentHashing(self.servers);
+          });
+        } else {
+          self.nodeRing = new ConsistentHashing();
+          logger.warn('  [event] server nodes [0] : NOT EXISTED');
+        }
+      }
+    }
+  );
+};
+
+
 
 export {NodeManager}
