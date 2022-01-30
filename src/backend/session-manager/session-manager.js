@@ -10,7 +10,6 @@ var Constants = {
 }
 
 
-
 class SessionManager{
   
   constructor(config, callback) {
@@ -109,7 +108,6 @@ class SessionManager{
 
   addUserinfo(app, roomID, userID, callback) {
 
-  
     var ukey =Constants.USER_INFO +":"+app +":"+ roomID
   
     this.redisClient.sadd(ukey,userID,(err,result)=>{

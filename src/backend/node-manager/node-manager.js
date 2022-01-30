@@ -232,74 +232,124 @@ var zookeeper = require('node-zookeeper-client')
   };
 
   _watchServerNodes(){
+    var self = this;
+    
+    this.zkClient.getChildren(
+      constants.BASE_ZNODE_PATH + constants.SERVERS_PATH,
+      function (event) {
+      
+        self._watchServerNodes();
+      },
+      function (error, children, stat) {
+        if (error) {
 
-  }
-}
+          logger.warn('Failed to list children due to: %s.', error);
+          if (error.getCode() == zookeeper.Exception.CONNECTION_LOSS) { 
+            self.zkClient.close();
+            self._connect(self.isWatching, function (err) {
+              if (err) logger.error(err);
+            })
+          }
 
-NodeManager.prototype._watchServerNodes = function () {
-
-  var self = this;
-  this.zkClient.getChildren(
-    constants.BASE_ZNODE_PATH + constants.SERVERS_PATH,
-    function (event) {
-     
-      self._watchServerNodes();
-    },
-    function (error, children, stat) {
-      if (error) {
-
-        logger.warn('Failed to list children due to: %s.', error);
-        if (error.getCode() == zookeeper.Exception.CONNECTION_LOSS) { // TODO 나중에 좀더 확인이 필요함!
-          self.zkClient.close();
-          self._connect(self.isWatching, function (err) {
-            if (err) logger.error(err);
-          })
-        }
-
-      } else {
-
-        var max = children.length;
-
-        var nodeTask = function (taskId, value, callback) {
-
-          self._getServerNode(children[taskId], function () {
-            taskId++
-            if (taskId < max) {
-              function_array.splice(function_array.length - 1, 0, nodeTask);
-            }
-            callback(null, taskId, ++value);   //TODO callback check
-          });
-        };
-
-        var startTask = function (callback) {
-          self.servers = {};
-          function_array.splice(function_array.length - 1, 0, nodeTask);
-          callback(null, 0, 0);       //TODO callback check
-        };
-
-        var finalTask = function (taskId, value, callback) {
-          callback(null, value);      //TODO callback check
-        };
-
-        var function_array = [startTask, finalTask];
-
-        if (max > 0) {
-
-          logger.info('  [event] server nodes [' + max + '] : ' + children);
-
-          async.waterfall(function_array, function (err, result) {
-            this.serverArray = [];
-            this.serverArray = children;
-            self.nodeRing = new ConsistentHashing(self.servers);
-          });
         } else {
-          self.nodeRing = new ConsistentHashing();
-          logger.warn('  [event] server nodes [0] : NOT EXISTED');
+
+          var max = children.length;
+
+          var nodeTask = function (taskId, value, callback) {           //its so complicated. change to promise(?) or something
+
+            self._getServerNode(children[taskId], function () {
+              taskId++
+              if (taskId < max) {
+                function_array.splice(function_array.length - 1, 0, nodeTask);
+              }
+              callback(null, taskId, ++value);   //TODO callback check
+            });
+          };
+
+          var startTask = function (callback) {
+            self.servers = {};
+            function_array.splice(function_array.length - 1, 0, nodeTask);
+            callback(null, 0, 0);       //TODO callback check
+          };
+
+          var finalTask = function (taskId, value, callback) {
+            callback(null, value);      //TODO callback check
+          };
+
+          var function_array = [startTask, finalTask];
+
+          if (max > 0) {
+
+            logger.info('  [event] server nodes [' + max + '] : ' + children);
+
+            async.waterfall(function_array, function (err, result) {
+              this.serverArray = [];
+              this.serverArray = children;
+              self.nodeRing = new ConsistentHashing(self.servers);
+            });
+          } else {
+            
+            
+            self.nodeRing = new ConsistentHashing();
+            logger.warn('  [event] server nodes [0] : NOT EXISTED');
+          }
         }
       }
+    );
+  }
+
+  /**
+   * get node info from zookeeper and input servers and serverArray
+   * @name _getServerNode
+   * @function
+   * @param {number} childPath - childPath
+   * @param {callback} callback -cb
+   */
+  _getServerNode(childPath, cb) {
+    var self = this;
+    var path = constants.BASE_ZNODE_PATH + constants.SERVERS_PATH + '/' + childPath;
+
+    var _w = function (event) {
+      
+      if (event.type == 3) {
+        self._getServerNode(childPath);
+      }
+    };
+
+    if (cb && self.serverArray.indexOf(childPath) > -1) {
+      _w = undefined;
     }
-  );
-};
+
+    self.zkClient.getData(path,
+      _w,
+      function (error, data, stat) {
+
+        if (error) {
+          logger.error('Fail retrieve server datas: %s.', error);
+        } else {
+
+          var replicas = 160;
+          if (data !== undefined && data !== null) {
+            replicas = data.toString('utf8');
+          }
+
+          self.servers[childPath] = childPath + "^" + replicas;
+
+          if (self.serverArray.indexOf(childPath) < 0) {
+            self.serverArray.push(childPath);
+          }
+
+          if (cb) {
+            cb();
+          } else {
+            self.nodeRing = new ConsistentHashing(self.servers);
+            
+          }
+        }
+      }
+    );
+  };
+}
 
 
 
