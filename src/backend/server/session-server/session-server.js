@@ -2,6 +2,7 @@ var express = require('express');
 
 var bodyParser = require('body-parser');
 import {SessionManager} from "../../session-manager/session-manager"
+import { NodeManager } from "../../node-manager/node-manager";
 
 var utiles = require('../../utiles/utiles')
 const  logger  = require('../../logger').logger
@@ -26,29 +27,63 @@ class SessionServer{
         this.server = express()
 
         var self =this
+
+        async.parallel([
+            (paralCallback)=>{
     
-        this.sessionManager =new SessionManager(this.conf.redis,function (err) {
-            if (!err) {
-    
-                self._start()
-    
-                logger.info(
-                    "sessionServer sucessfully inited "+
-                    "\nconf:" +JSON.stringify(self.conf)
-                )
-    
-                callback(null);
-            }else{
-    
-                logger.info('session server init failed err:',err.toString())
-    
-                
-                callback(err);  //TODO:  Callback was already called err 
-            }
+                this.sessionManager =new SessionManager(this.conf.redis,function (err) {
+                    if (err) {
+                    
+                        logger.info('session server init failed err:',err.toString())
             
-        });
-    
-    
+                        
+                        callback(err);  //TODO:  Callback was already called err 
+                    }
+            
+                    self._start()
+
+                    logger.info(
+                        "sessionServer sucessfully inited "+
+                        "\nconf:" +JSON.stringify(self.conf)
+                    )
+
+                    callback(null);
+                    
+                });
+            },
+            (paralCallback)=>{
+                self.nodeManager = new NodeManager(self.conf.zookeeper,true,(err)=>{
+
+                    if(err){
+                        paralCallback(err)
+                    }    
+                    
+                    logger.info(' (init) ZOOKEEPER is connected');
+
+                    self.nodeManager.createEphemeralPath(
+                        NodeConstants.META_PATH + NodeConstants.GW_SERVER_PATH + '/' + self.conf.host + ':' + self.conf.port,
+                        function (err) {
+
+                            if(err){
+                                paralCallback(err)
+                            }else{
+                                logger.info('ZOOKEEPER /' + self.conf.host + ':' + self.conf.port);
+
+                                self.nodeManager.getConfigInfo('balancing', function (data) {
+                                    if (data) {
+                                        self.conf.balancing = data;
+                                    }
+                                });
+
+                                paralCallback(null)
+                            }                         
+                        }
+                    ) 
+                    
+                       
+                });
+            }
+        ])
     }
 
     _start(){

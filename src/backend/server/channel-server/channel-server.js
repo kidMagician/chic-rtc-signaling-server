@@ -1,7 +1,8 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var utiles = require('./../../utiles/utiles')
-var SessionManager = require('../../session-manager/session-manager').SessionManager
+import {SessionManager} from '../../session-manager/session-manager'
+import { NodeManager } from '../../node-manager/node-manager';
 var async = require('async')
 const  logger  = require('../../logger').logger
 
@@ -37,14 +38,54 @@ class ChannelServer extends EventEmitter{
 
         var self = this
 
-        self.sessionManger = new SessionManager(self.conf.redis,(err)=>{
-            if (err) {
-                callback(err);
-            }
+        async.parallel([
+            function(parallelCallback){
+    
+                var startReplicas = Math.pow(Number(self.conf.balancing['REPLICA_BASE_NUMBER']), Number(self.conf.balancing['MAX_LEVEL']));
+    
+                self.nodeManager = new NodeManager(self.conf.zookeeper,false,(err)=>{
+    
+                    if(err){
 
-            callback(null)
-            
-        })
+                        return parallelCallback(err)
+                    }
+    
+                    logger.info(' (init) ZOOKEEPER is connected');
+
+                    self.nodeManager.addServerNode(self.conf, startReplicas, function(err, path) {
+
+                        if(err){
+                            return parallelCallback(err)
+                        }
+    
+                        var serverName = path.substring(path.lastIndexOf('/') + 1, path.length);
+                        self.serverNodePath = path;
+    
+                        self.serverName = serverName.split('^')[0];
+    
+                        self.replicas = startReplicas;
+    
+    
+                        parallelCallback(err);
+                    });
+                    
+                })
+    
+            },
+            function(parallelCallback){
+
+                self.sessionManger = new SessionManager(self.conf.redis,(err)=>{
+                    if (err) {
+                        parallelCallback(err);
+                    }
+        
+                    parallelCallback(null)
+                    
+                })
+            }
+        ])
+
+        
 
         process.on('uncaughtException', function(error) {
             logger.info("channel uncaughtException.... "+ error.toString())
