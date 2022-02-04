@@ -30,6 +30,13 @@ class ChannelServer extends EventEmitter{
 
         this.serverName= conf.serverName
 
+        this.conf.balancing = {
+            SCALE: 60, // 단계별 Connection 수
+            BUFFER_COUNT: 10, // replica 수정에 대한 인계치 버퍼
+            MAX_LEVEL: 4, // scale 배수
+            REPLICA_BASE_NUMBER: 4 //
+        };
+
         if(!signalingServer){
             callback(new Error("websocket cant not be null"))
         }

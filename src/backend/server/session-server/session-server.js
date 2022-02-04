@@ -1,11 +1,13 @@
 var express = require('express');
 
 var bodyParser = require('body-parser');
+
 import {SessionManager} from "../../session-manager/session-manager"
 import { NodeManager } from "../../node-manager/node-manager";
 
 var utiles = require('../../utiles/utiles')
 const  logger  = require('../../logger').logger
+const async = require('async')
 
 class SessionServer{
     
@@ -110,6 +112,7 @@ class SessionServer{
             self.sessionManager.retrieveConnectedNode('CHIC_RTC',req.params.rid,(sessionData)=>{
                 
                 var users =[]
+                var serverNode
     
                 if(sessionData || sessionData.userInfo){
     
@@ -122,13 +125,13 @@ class SessionServer{
                     users: users
                 }
     
-                // var serverNode
+                serverNode =self.nodeManager.getServerNode(req.params.rid)
     
                 var responseData ={
                     serverinfo:{
                         signalServer:{
-                            serverName: "chic-rtc-test-server",
-                            url: "ws://localhost:9000",
+                            serverName: serverNode.name,
+                            url: utiles.setWSProtocal(serverNode.url,null)
                         },
                         stunServer: {"url": "stun:stun2.1.google.com:19302" }
                     },

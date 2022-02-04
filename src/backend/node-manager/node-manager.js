@@ -1,5 +1,5 @@
 
-var zookeeper = require('node-zookeeper-client')
+var zookeeper = require('node-zookeeper-client'),
   logger = require('../logger').logger,
 
   constants = require('./constants'),
@@ -27,21 +27,6 @@ var zookeeper = require('node-zookeeper-client')
         this.connectionTryNum = 0;
     
         this._connect(isWatching, callback);
-    
-        var connectTry = function () {
-    
-        if (!this.connected) {
-            if (this.connectionTryNum > 3) {
-            if (callback) callback(new Error('zookeeper - failed to connect to [' + this.address + ']'));
-            } else {
-    
-            if (this.connectionTryNum > 1) logger.warn(' (init) ZOOKEEPER connection retry ' + (this.connectionTryNum - 1));
-              this.connectionTryNum++;
-              setTimeout(connectTry, 2000);
-            }
-        }
-        };
-        connectTry();
     };
   
   
@@ -349,6 +334,11 @@ var zookeeper = require('node-zookeeper-client')
       }
     );
   };
+
+  getServerNode(key) {
+    return this.nodeRing.getNode(key);
+  };
+
 }
 
 
