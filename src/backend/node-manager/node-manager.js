@@ -268,8 +268,8 @@ var zookeeper = require('node-zookeeper-client'),
             logger.info('  [event] server nodes [' + max + '] : ' + children);
 
             async.waterfall(function_array, function (err, result) {
-              this.serverArray = [];
-              this.serverArray = children;
+              self.serverArray = [];
+              self.serverArray = children;
               self.nodeRing = new ConsistentHashing(self.servers);
             });
           } else {
@@ -335,9 +335,133 @@ var zookeeper = require('node-zookeeper-client'),
     );
   };
 
+  _getConfigNode = function (key, cb) {
+    var self = this;
+    var path = constants.BASE_ZNODE_PATH + constants.CONFIG_PATH + '/' + key;
+  
+    var _w = function (event) {
+      
+      if (event.type == 3) {
+        self._getConfigNode(key, cb);
+      }
+    };
+  
+    self.zkClient.getData(path,
+      _w,
+      function (error, data, stat) {
+  
+        if (error) {
+  
+          if (error.name == "NO_NODE") {
+            if (cb) {
+              cb(configData);
+            }
+          } else {
+            logger.error(error);
+          }
+        }
+  
+        if (data) {
+  
+          var tmp = data.toString('utf8');
+          var configData = JSON.parse(tmp);
+  
+          if (cb) {
+            cb(configData);
+          }
+  
+        } else {
+          if (cb) {
+            cb();
+          }
+        }
+      }
+    );
+  };
+
+  
+
+  addServerNode(config, replicas, callback) {
+
+    var self = this;
+    var address = config.host;
+    var port =  config.port;
+    var serverName = config.serverName;
+  
+    this.zkClient.getChildren(
+      constants.BASE_ZNODE_PATH + constants.SERVERS_PATH,
+      function (error, nodes, stats) {
+        if (error) {
+          logger.error(error.stack);
+          callback(error);
+          return;
+        }
+  
+        var server = address + ':' + port;
+        var isExisted = false;
+        var names = [];
+  
+        var existedPathName;
+  
+        for (var i = 0; i < nodes.length; i++) {
+  
+          var ninfo = nodes[i].split('^'); 
+  
+          if (server == ninfo[1]) { 
+            existedPathName = nodes[i];
+            isExisted = true;
+            break;
+          }
+  
+          if ( typeof names[inx] == 'number' ){
+            names.push(Number(ninfo[0])); 
+          } else {
+            names.push(ninfo[0]);
+          }
+  
+        }
+  
+        if (!isExisted) {
+  
+          if( !serverName ){
+            serverName = 10;
+            if (names.length > 0) {
+              var maxBefore = 0;
+              for( var inx in names ){
+                if ( typeof names[inx] == 'number' ){
+                  maxBefore = names[inx] ;
+                }
+              }
+  
+              serverName = maxBefore + Math.floor(Math.random() * (20 - 10 + 1)) + 10;
+            }
+          }
+  
+          var nodePath = constants.SERVERS_PATH + '/' + serverName + '^' + server;
+  
+          self._createEphemeralZnode(nodePath, replicas + "", (err)=>{
+            callback(null,nodePath)
+          });
+  
+        } else {
+          if (callback) callback(null,constants.SERVERS_PATH + '/' + existedPathName);
+        }
+      }
+    );
+  };
+
   getServerNode(key) {
     return this.nodeRing.getNode(key);
   };
+
+  createEphemeralPath(path, data, callback) {
+    this._createEphemeralZnode(path, data, callback);
+  };
+
+  getConfigInfo(key, cb) {
+    return this._getConfigNode(key, cb);
+  };
+  
 
 }
 

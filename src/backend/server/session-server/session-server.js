@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 
 import {SessionManager} from "../../session-manager/session-manager"
 import { NodeManager } from "../../node-manager/node-manager";
+var NodeConstants = require("../../node-manager/constants")
 
 var utiles = require('../../utiles/utiles')
 const  logger  = require('../../logger').logger
