@@ -56,15 +56,12 @@ class ChannelServer extends EventEmitter{
 
                         return parallelCallback(err)
                     }
-    
-                    logger.info(' (init) ZOOKEEPER is connected');
 
                     self.nodeManager.addServerNode(self.conf, startReplicas, function(err, path) {
 
                         if(err){
                             return parallelCallback(err)
                         }
-    
                         var serverName = path.substring(path.lastIndexOf('/') + 1, path.length);
                         self.serverNodePath = path;
     
@@ -74,7 +71,13 @@ class ChannelServer extends EventEmitter{
     
     
                         parallelCallback(err);
+                        
+    
+                        
                     });
+                    
+
+                   
                     
                 })
     
@@ -90,7 +93,18 @@ class ChannelServer extends EventEmitter{
                     
                 })
             }
-        ])
+        ],(err)=>{
+
+            if(err){
+                return callback(err)
+            }
+
+            self._start()
+            logger.info("channel server successfully inited port: "+ conf.port)
+            callback(null)
+            
+
+        })
 
         
 
@@ -102,10 +116,8 @@ class ChannelServer extends EventEmitter{
 
         })
 
-        self._start()
-
-        logger.info("chennel server successfully inited")
-        callback(null)
+        
+        
     }
 
     _start(){

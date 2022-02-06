@@ -38,16 +38,20 @@ var zookeeper = require('node-zookeeper-client'),
   
     this.zkClient.once('connected', function () {
 
+      logger.info("successfully ZOOKEEPER is connected")
+
       self.connected = true;
 
       self._initPath('', function () {
-        self._initPath(constants.SERVERS_PATH, function () {
+        self._initPath(constants.CHANNEL_SERVERS_PATH, function () {
           self._initPath(constants.META_PATH, function () {
             self._initPath(constants.META_PATH + constants.APP_PATH, function () {
               self._initPath(constants.META_PATH + constants.SESSION_SERVER_PATH, function () {
 
                 if (isWatching) {
                   self._watchServerNodes();
+
+                  console.log("start watching serverNodes")
                 }
 
                 self.ready = true;
@@ -161,6 +165,12 @@ var zookeeper = require('node-zookeeper-client'),
   
   
         } else {
+
+          logger.info(
+            "succeesfully create createEphemeralZnode" +
+            "\nnodePath: "+ constants.BASE_ZNODE_PATH + nodePath +
+            "\nnodeData: "+ nodeData
+          )
           if (callback) callback(null);
         }
       }
@@ -220,7 +230,7 @@ var zookeeper = require('node-zookeeper-client'),
     var self = this;
     
     this.zkClient.getChildren(
-      constants.BASE_ZNODE_PATH + constants.SERVERS_PATH,
+      constants.BASE_ZNODE_PATH + constants.CHANNEL_SERVERS_PATH,
       function (event) {
       
         self._watchServerNodes();
@@ -292,7 +302,7 @@ var zookeeper = require('node-zookeeper-client'),
    */
   _getServerNode(childPath, cb) {
     var self = this;
-    var path = constants.BASE_ZNODE_PATH + constants.SERVERS_PATH + '/' + childPath;
+    var path = constants.BASE_ZNODE_PATH + constants.CHANNEL_SERVERS_PATH + '/' + childPath;
 
     var _w = function (event) {
       
@@ -389,7 +399,7 @@ var zookeeper = require('node-zookeeper-client'),
     var serverName = config.serverName;
   
     this.zkClient.getChildren(
-      constants.BASE_ZNODE_PATH + constants.SERVERS_PATH,
+      constants.BASE_ZNODE_PATH + constants.CHANNEL_SERVERS_PATH,
       function (error, nodes, stats) {
         if (error) {
           logger.error(error.stack);
@@ -437,14 +447,14 @@ var zookeeper = require('node-zookeeper-client'),
             }
           }
   
-          var nodePath = constants.SERVERS_PATH + '/' + serverName + '^' + server;
+          var nodePath = constants.CHANNEL_SERVERS_PATH + '/' + serverName + '^' + server;
   
           self._createEphemeralZnode(nodePath, replicas + "", (err)=>{
             callback(null,nodePath)
           });
   
         } else {
-          if (callback) callback(null,constants.SERVERS_PATH + '/' + existedPathName);
+          if (callback) callback(null,constants.CHANNEL_SERVERS_PATH + '/' + existedPathName);
         }
       }
     );

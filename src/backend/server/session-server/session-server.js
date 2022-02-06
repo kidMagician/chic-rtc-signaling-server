@@ -40,17 +40,11 @@ class SessionServer{
                         logger.info('session server init failed err:',err.toString())
             
                         
-                        callback(err);  //TODO:  Callback was already called err 
+                        paralCallback(err);  //TODO:  Callback was already called err 
                     }
-            
-                    self._start()
 
-                    logger.info(
-                        "sessionServer sucessfully inited "+
-                        "\nconf:" +JSON.stringify(self.conf)
-                    )
+                    paralCallback(null)
 
-                    callback(null);
                     
                 });
             },
@@ -58,19 +52,16 @@ class SessionServer{
                 self.nodeManager = new NodeManager(self.conf.zookeeper,true,(err)=>{
 
                     if(err){
-                        paralCallback(err)
-                    }    
-                    
-                    logger.info(' (init) ZOOKEEPER is connected');
+                        return paralCallback(err)
+                    }
 
                     self.nodeManager.createEphemeralPath(
-                        NodeConstants.META_PATH + NodeConstants.GW_SERVER_PATH + '/' + self.conf.host + ':' + self.conf.port,
+                        NodeConstants.META_PATH + NodeConstants.SESSION_SERVER_PATH + '/' + self.conf.host + ':' + self.conf.port,
                         function (err) {
 
                             if(err){
                                 paralCallback(err)
                             }else{
-                                logger.info('ZOOKEEPER /' + self.conf.host + ':' + self.conf.port);
 
                                 self.nodeManager.getConfigInfo('balancing', function (data) {
                                     if (data) {
@@ -81,12 +72,31 @@ class SessionServer{
                                 paralCallback(null)
                             }                         
                         }
-                    ) 
+                    )
+
                     
                        
                 });
             }
-        ])
+        ],(err)=>{
+
+            if(err){
+                return callback(err)
+            }
+
+            self._start()
+
+            logger.info(
+                "sessionServer sucessfully inited "+
+                "\nconf:" +JSON.stringify(self.conf)
+            )
+
+            callback(null);
+
+            
+
+            
+        })
     }
 
     _start(){

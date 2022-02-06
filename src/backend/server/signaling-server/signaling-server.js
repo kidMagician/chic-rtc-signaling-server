@@ -150,7 +150,7 @@ class SignalingServer extends EventEmitter{
 
           if(err){
 
-            err.sendErrMessage(connection)
+            return err.sendErrMessage(connection)
           }
 
           var message = {
