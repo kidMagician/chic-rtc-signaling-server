@@ -37,48 +37,48 @@ sessionServer.init(sessionConf,(err)=>{
 
 })
 
-// var wsPort = 9000;
-// var WebSocketServer = require('ws').Server; 
-// var wss = new WebSocketServer(
-//     {
-//         port: wsPort,
-//         // server:server
-//     }
+var wsPort = 9000;
+var WebSocketServer = require('ws').Server; 
+var wss = new WebSocketServer(
+    {
+        port: wsPort,
+        // server:server
+    }
     
-// ); 
+); 
 
-// var SignalingServer = require('./backend/server/signaling-server/signaling-server').SignalingServer
-// var signalingServer = new SignalingServer()
+var SignalingServer = require('./backend/server/signaling-server/signaling-server').SignalingServer
+var signalingServer = new SignalingServer()
 
-// signalingServer.init(wss,(err)=>{
+signalingServer.init(wss,(err)=>{
 
-//     if(err){
-//         console.error("fail channel server init err: "+ err.toString())
-//         return
-//     }
+    if(err){
+        console.error("fail channel server init err: "+ err.toString())
+        return
+    }
 
-//     var ChannelServer = require('./backend/server/channel-server/channel-server').ChannelServer
-//     var channelserver =new ChannelServer()
+    var ChannelServer = require('./backend/server/channel-server/channel-server').ChannelServer
+    var channelserver =new ChannelServer()
 
-//     var channelConf={
-//         "redis": {
-//             host:"127.0.0.1", 
-//             port:"6379",
-//             // password:"0000",
-//         },
-//         "host": "127.0.0.1",
-//         "port": wsPort,
-//         "ssl": false,
-//         "serverName":"testServer"
-//     }
+    var channelConf={
+        "redis": {
+            host:"127.0.0.1", 
+            port:"6379",
+            // password:"0000",
+        },
+        "host": "127.0.0.1",
+        "port": wsPort,
+        "ssl": false,
+        "serverName":"testServer"
+    }
 
-//     channelserver.init(channelConf,signalingServer,(err)=>{
+    channelserver.init(channelConf,signalingServer,(err)=>{
 
-//         if(err){
-//             logger.error('channel server init failed err:',err.toString())
-//         }
+        if(err){
+            logger.error('channel server init failed err:',err.toString())
+        }
 
-//     });
+    });
   
-// })
+})
 

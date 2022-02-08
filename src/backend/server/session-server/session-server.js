@@ -93,9 +93,6 @@ class SessionServer{
 
             callback(null);
 
-            
-
-            
         })
     }
 

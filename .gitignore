@@ -2,3 +2,6 @@
 /package-lock.json
 /build
 ..log**
+channel.json
+session.json
+log
