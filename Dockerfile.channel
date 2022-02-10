@@ -3,9 +3,9 @@ FROM node:8.11.4
 EXPOSE 9000
 EXPOSE 9229
 
-ADD . /smoothy-rtc-channel-server/
-RUN cd /smoothy-rtc-channel-server && npm install 
-RUN cd /smoothy-rtc-channel-server && mkdir log
+ADD . /chic-rtc-channel-server/
+RUN cd /chic-rtc-channel-server && npm install 
+RUN cd /chic-rtc-channel-server && mkdir log
 
-CMD cd /smoothy-rtc-channel-server/bin && npm run build && node --inspect=0.0.0.0:9229 start.js --channel --config channel.json
+CMD cd /chic-rtc-channel-server/bin && npm run build && node --inspect=0.0.0.0:9229 start.js --channel --config channel.json
 

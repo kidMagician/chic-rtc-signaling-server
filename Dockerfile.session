@@ -3,10 +3,10 @@ FROM node:8.11.4
 
 EXPOSE 8080
 
-ADD . /smoothy-rtc-session-server/
-RUN cd /smoothy-rtc-session-server && npm install 
-RUN cd /smoothy-rtc-session-server && mkdir log
+ADD . /chic-rtc-session-server/
+RUN cd /chic-rtc-session-server && npm install 
+RUN cd /chic-rtc-session-server && mkdir log
 
-CMD cd /smoothy-rtc-session-server/bin && npm run build && node start.js --inspect=0.0.0.0:9229 --session --config session.json
+# CMD cd /chic-rtc-session-server/bin && npm run build && node start.js --inspect=0.0.0.0:9229 --session --config session.json
 
 
