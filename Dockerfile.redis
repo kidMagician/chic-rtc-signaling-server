@@ -1,0 +1,19 @@
+#Dockerfile.redis
+FROM redis:4.0.11
+
+RUN mkdir  /var/log/redis
+RUN mkdir  /usr/local/etc/redis
+
+
+COPY ./conf/redis/redis.conf /usr/local/etc/redis/redis.conf
+COPY ./docker-redis-entrypoint.sh /docker-redis-entrypoint.sh
+COPY  ./test.sh /test.sh
+
+# CMD [ "/docker-redis-entrypoint.sh" ]
+
+EXPOSE 6379
+
+
+
+
+

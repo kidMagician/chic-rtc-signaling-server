@@ -8,6 +8,7 @@ var sessionServer =new SessionServer()
 var sessionConf ={
   
     "port": 8080,
+    "zookeeper": "172.17.0.3:2181",
     "redis": {
         host:"127.0.0.1",
         port:"6379"
