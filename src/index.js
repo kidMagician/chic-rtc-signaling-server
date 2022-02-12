@@ -3,40 +3,40 @@ var ChannelServer = require('./backend/server/channel-server/channel-server').Ch
 
 const logger = require('./backend/logger').logger
 
-var sessionServer =new SessionServer()
+// var sessionServer =new SessionServer()
 
-var sessionConf ={
+// var sessionConf ={
   
-    "port": 8080,
-    "zookeeper": "172.17.0.3:2181",
-    "redis": {
-        host:"127.0.0.1",
-        port:"6379"
-    },
-}
+//     "port": 8080,
+//     "zookeeper": "172.17.0.3:2181",
+//     "redis": {
+//         host:"127.0.0.1",
+//         port:"6379"
+//     },
+// }
 
 
-sessionServer.init(sessionConf,(err)=>{
+// sessionServer.init(sessionConf,(err)=>{
 
-    if(err){
+//     if(err){
 
-        console.error("fail init session server err: "+ err)
+//         console.error("fail init session server err: "+ err)
 
-        //TODO: process kill
+//         //TODO: process kill
       
     
-    }else{
+//     }else{
 
-        sessionServer.listen((err)=>{
+//         sessionServer.listen((err)=>{
 
-            if(err){
-                    console.error("fail listen sessionServer err: "+ err  )
-            }
+//             if(err){
+//                     console.error("fail listen sessionServer err: "+ err  )
+//             }
             
-        })
-    }
+//         })
+//     }
 
-})
+// })
 
 var wsPort = 9000;
 var WebSocketServer = require('ws').Server; 
@@ -48,38 +48,39 @@ var wss = new WebSocketServer(
     
 ); 
 
-// var SignalingServer = require('./backend/server/signaling-server/signaling-server').SignalingServer
-// var signalingServer = new SignalingServer()
+var SignalingServer = require('./backend/server/signaling-server/signaling-server').SignalingServer
+var signalingServer = new SignalingServer()
 
-// signalingServer.init(wss,(err)=>{
+signalingServer.init(wss,(err)=>{
 
-//     if(err){
-//         console.error("fail channel server init err: "+ err.toString())
-//         return
-//     }
+    if(err){
+        console.error("fail channel server init err: "+ err.toString())
+        return
+    }
 
-//     var ChannelServer = require('./backend/server/channel-server/channel-server').ChannelServer
-//     var channelserver =new ChannelServer()
+    var ChannelServer = require('./backend/server/channel-server/channel-server').ChannelServer
+    var channelserver =new ChannelServer()
 
-//     var channelConf={
-//         "redis": {
-//             host:"127.0.0.1", 
-//             port:"6379",
-//             // password:"0000",
-//         },
-//         "host": "127.0.0.1",
-//         "port": wsPort,
-//         "ssl": false,
-//         "serverName":"testServer"
-//     }
+    var channelConf={
+        "redis": {
+            host:"127.0.0.1", 
+            port:"6379",
+            // password:"0000",
+        },
+        "zookeeper": "127.0.0.1:2181",
+        "host": "127.0.0.1",
+        "port": wsPort,
+        "ssl": false,
+        "serverName":"testServer"
+    }
 
-//     channelserver.init(channelConf,signalingServer,(err)=>{
+    channelserver.init(channelConf,signalingServer,(err)=>{
 
-//         if(err){
-//             logger.error('channel server init failed err:',err.toString())
-//         }
+        if(err){
+            logger.error('channel server init failed err:',err.toString())
+        }
 
-//     });
+    });
   
-// })
+})
 
