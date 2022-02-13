@@ -23,7 +23,8 @@ class SessionServer{
         this.conf ={
             port: conf.port || '8000',
             host: this.conf.host || utiles.getIP(),
-            redis: conf.redis
+            redis: conf.redis,
+            zookeeper: conf.zookeeper
     
         }
     

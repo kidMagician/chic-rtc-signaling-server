@@ -23,7 +23,7 @@ class ChannelServer extends EventEmitter{
         this.conf ={
             host: conf.host || utiles.getIP(),
             port: conf.port || 9090,
-
+            zookeeper: conf.zookeeper,
             redis: conf.redis,
             
         }

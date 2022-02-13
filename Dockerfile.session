@@ -7,6 +7,6 @@ ADD . /chic-rtc-session-server/
 RUN cd /chic-rtc-session-server && npm install 
 RUN cd /chic-rtc-session-server && mkdir log
 
-# CMD cd /chic-rtc-session-server/bin && npm run build && node start.js --inspect=0.0.0.0:9229 --session --config session.json
+CMD cd /chic-rtc-session-server/bin && npm run build && node start.js --inspect=0.0.0.0:9229 --session --config session.json
 
 
