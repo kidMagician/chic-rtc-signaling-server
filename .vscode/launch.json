@@ -7,8 +7,23 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}\\build\\index.js",
+            "name": "Launch session server",
+            "program": "${workspaceFolder}\\bin\\start.js",
+            "args": ["--session", "--config", "${workspaceFolder}\\bin\\session.json"],
+            "preLaunchTask": "build",
+            "ouDir": [
+                "${workspaceRoot}\\build"
+            ],
+            
+            "sourceMaps": true,
+            "outputCapture": "std",
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch channel server",
+            "program": "${workspaceFolder}\\bin\\start.js",
+            "args": ["--channel", "--config", "${workspaceFolder}\\bin\\channel.json"],
             "preLaunchTask": "build",
             "ouDir": [
                 "${workspaceRoot}\\build"
