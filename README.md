@@ -41,21 +41,16 @@ vim ./bin/session.json //and rewrite it
 ```
 
 3. run channel-server
+
 ```
 docker build -t test-channel:v1 . -f Dockerfile.channel
-
-docker run --rm -p 9000:9000  -it --entrypoint bash  test-channel:v1
-cd /chic-rtc-channel-server/bin && npm run build && node --inspect=0.0.0.0:9229 start.js --channel --config channel.json
+docker run --rm -p 9000:9000  -it test-channel:v1
 
 ```
 
 4. run session-server
 ```
 docker build -t test-session:v1 . -f Dockerfile.session
-
-docker run -p 8080:8080 -it --entrypoint bash test-session:v1
-cd /chic-rtc-session-server/bin && npm run build && node start.js --inspect=0.0.0.0:9229 --session --config session.json
-
-
+docker run -p 8080:8080 -it test-session:v1
 ```
 
