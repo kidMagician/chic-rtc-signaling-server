@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel src -d build --source-maps"
+    "build": "babel src -d build  --source-maps",
+    "type-check": " ",
+    "type-check:watch": "npm run type-check -- --watch"
   },
   "author": "nss",
   "license": "ISC",
@@ -22,9 +24,11 @@
     "ws": "^8.4.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.16.8",
-    "@babel/core": "^7.16.7",
+    "@babel/cli": "^7.17.6",
+    "@babel/core": "^7.17.7",
     "@babel/node": "^7.16.8",
-    "@babel/preset-env": "^7.16.8"
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
+    "typescript": "^4.6.2"
   }
 }

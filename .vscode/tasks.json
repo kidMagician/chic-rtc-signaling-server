@@ -14,6 +14,16 @@
                 "_id": "build",
                 "isDefault": false
             }
-        }
+        },
+        {
+			
+			"type": "typescript",
+			"tsconfig": "tsconfig.json",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build",
+			"label": "tsc build"
+		}
     ]
 }
