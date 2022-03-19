@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel src -d build  --source-maps",
-    "type-check": " ",
+    "build": "babel src -d build --extensions \".js,.ts,.tsx\" --source-maps",
+    "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch"
   },
   "author": "nss",

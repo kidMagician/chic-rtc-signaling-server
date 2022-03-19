@@ -1,28 +1,40 @@
-var express = require('express');
+var express = require('express')
 
-var bodyParser = require('body-parser');
+var bodyParser = require('body-parser')
 
 import {SessionManager} from "../../session-manager/session-manager"
 import { NodeManager } from "../../node-manager/node-manager";
-var NodeConstants = require("../../node-manager/constants")
+import NodeConstants from "../../node-manager/constants"
 
 var utiles = require('../../utiles/utiles')
-const  logger  = require('../../logger').logger
-const async = require('async')
+var  logger = require('../../logger').logger
+var  async = require('async')
+
+interface Config { 
+    port: any;
+    host: any|null;
+    redis: any;
+    zookeeper: any;
+    balancing?: any;
+    ssl?:any
+}
 
 class SessionServer{
+
+    conf:Config;
+    server:any
+    sessionserver:any
+    sessionManager:SessionManager
+    nodeManager:NodeManager
     
     constructor(){
-        this.conf={};
-        this.server
-        this.sessionServer
     }
 
-    init(conf,callback){
+    init(conf:any,callback:any){
     
         this.conf ={
             port: conf.port || '8000',
-            host: this.conf.host || utiles.getIP(),
+            host: conf.host || utiles.getIP(),
             redis: conf.redis,
             zookeeper: conf.zookeeper
     
@@ -33,9 +45,9 @@ class SessionServer{
         var self =this
 
         async.parallel([
-            (paralCallback)=>{
+            (paralCallback:any)=>{
     
-                this.sessionManager =new SessionManager(this.conf.redis,function (err) {
+                this.sessionManager =new SessionManager(this.conf.redis,function (err:any) {
                     if (err) {
                     
                         logger.info('session server init failed err:',err.toString())
@@ -49,8 +61,8 @@ class SessionServer{
                     
                 });
             },
-            (paralCallback)=>{
-                self.nodeManager = new NodeManager(self.conf.zookeeper,true,(err)=>{
+            (paralCallback:any)=>{
+                self.nodeManager = new NodeManager(self.conf.zookeeper,true,(err:any)=>{
 
                     if(err){
                         return paralCallback(err)
@@ -58,13 +70,13 @@ class SessionServer{
 
                     self.nodeManager.createEphemeralPath(
                         NodeConstants.META_PATH + NodeConstants.SESSION_SERVER_PATH + '/' + self.conf.host + ':' + self.conf.port,
-                        function (err) {
+                        function (err:any) {
 
                             if(err){
                                 paralCallback(err)
                             }else{
 
-                                self.nodeManager.getConfigInfo('balancing', function (data) {
+                                self.nodeManager.getConfigInfo('balancing', function (data:any) {
                                     if (data) {
                                         self.conf.balancing = data;
                                     }
@@ -79,7 +91,7 @@ class SessionServer{
                        
                 });
             }
-        ],(err)=>{
+        ],(err:any)=>{
 
             if(err){
                 return callback(err)
@@ -107,18 +119,18 @@ class SessionServer{
         
         var self =this
 
-        this.server.get('/room/:rid/user/:uid',function(req,res){
+        this.server.get('/room/:rid/user/:uid',function(req:any,res:any){
     
             logger.debug("[Seeion server] http get params:" +JSON.stringify(req.params))
     
             if(!req.params.rid||!req.params.uid){
                 
-                var err= new errors.BadRequestError("userID or roomID could not be null")
+                // var err= new errors.BadRequestError("userID or roomID could not be null")    //TODO: errors 정의해서 넣기
     
-                throw err
+                // throw err
             }
     
-            self.sessionManager.retrieveConnectedNode('CHIC_RTC',req.params.rid,(sessionData)=>{
+            self.sessionManager.retrieveConnectedNode('CHIC_RTC',req.params.rid,(sessionData:any)=>{
                 
                 var users =[]
                 var serverNode
@@ -160,7 +172,7 @@ class SessionServer{
         
         })
     
-        this.server.get('/',function(req,res){
+        this.server.get('/',function(req:any,res:any){
             
             res.sendFile(FRONTENDPATH+"/views/client.html");
     
@@ -168,7 +180,7 @@ class SessionServer{
     
     }
 
-    listen = function(callback){
+    listen(callback:any){
 
         try{
             if(!this.conf.ssl){

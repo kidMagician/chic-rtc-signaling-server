@@ -10,7 +10,6 @@ npm install
 1. run zookeeper
 ```
 docker build -t test-zoo:v1 . -f Dockefile.zookeeper
-
 docker run --name test-zoo -d -p 2181:2181 test-zoo:v1
 
 ```
@@ -51,6 +50,6 @@ docker run --rm -p 9000:9000  -it test-channel:v1
 4. run session-server
 ```
 docker build -t test-session:v1 . -f Dockerfile.session
-docker run -p 8080:8080 -it test-session:v1
+docker run --rm -p 8080:8080 -it test-session:v1
 ```
 
