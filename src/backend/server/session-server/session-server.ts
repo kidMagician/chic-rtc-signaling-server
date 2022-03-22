@@ -1,4 +1,4 @@
-var express = require('express')
+import express from 'express'
 
 var bodyParser = require('body-parser')
 
@@ -22,8 +22,7 @@ interface Config {
 class SessionServer{
 
     conf:Config;
-    server:any
-    sessionserver:any
+    server:express.Express
     sessionManager:SessionManager
     nodeManager:NodeManager
     
@@ -47,7 +46,7 @@ class SessionServer{
         async.parallel([
             (paralCallback:any)=>{
     
-                this.sessionManager =new SessionManager(this.conf.redis,function (err:any) {
+                this.sessionManager =new SessionManager(this.conf.redis,function (err:Error) {
                     if (err) {
                     
                         logger.info('session server init failed err:',err.toString())
@@ -62,7 +61,7 @@ class SessionServer{
                 });
             },
             (paralCallback:any)=>{
-                self.nodeManager = new NodeManager(self.conf.zookeeper,true,(err:any)=>{
+                self.nodeManager = new NodeManager(self.conf.zookeeper,true,(err:Error)=>{
 
                     if(err){
                         return paralCallback(err)
@@ -70,7 +69,7 @@ class SessionServer{
 
                     self.nodeManager.createEphemeralPath(
                         NodeConstants.META_PATH + NodeConstants.SESSION_SERVER_PATH + '/' + self.conf.host + ':' + self.conf.port,
-                        function (err:any) {
+                        function (err:Error) {
 
                             if(err){
                                 paralCallback(err)
@@ -91,7 +90,7 @@ class SessionServer{
                        
                 });
             }
-        ],(err:any)=>{
+        ],(err:Error)=>{
 
             if(err){
                 return callback(err)

@@ -1,10 +1,10 @@
-"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.SessionServer = void 0;
+"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.SessionServer = void 0;var _express = _interopRequireDefault(require("express"));
 
 
 
 var _sessionManager = require("../../session-manager/session-manager");
 var _nodeManager = require("../../node-manager/node-manager");
-var _constants = _interopRequireDefault(require("../../node-manager/constants"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { "default": obj };}function _classCallCheck(instance, Constructor) {if (!(instance instanceof Constructor)) {throw new TypeError("Cannot call a class as a function");}}function _defineProperties(target, props) {for (var i = 0; i < props.length; i++) {var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);}}function _createClass(Constructor, protoProps, staticProps) {if (protoProps) _defineProperties(Constructor.prototype, protoProps);if (staticProps) _defineProperties(Constructor, staticProps);Object.defineProperty(Constructor, "prototype", { writable: false });return Constructor;}var express = require('express');var bodyParser = require('body-parser');
+var _constants = _interopRequireDefault(require("../../node-manager/constants"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { "default": obj };}function _classCallCheck(instance, Constructor) {if (!(instance instanceof Constructor)) {throw new TypeError("Cannot call a class as a function");}}function _defineProperties(target, props) {for (var i = 0; i < props.length; i++) {var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);}}function _createClass(Constructor, protoProps, staticProps) {if (protoProps) _defineProperties(Constructor.prototype, protoProps);if (staticProps) _defineProperties(Constructor, staticProps);Object.defineProperty(Constructor, "prototype", { writable: false });return Constructor;}var bodyParser = require('body-parser');
 
 var utiles = require('../../utiles/utiles');
 var logger = require('../../logger').logger;
@@ -26,7 +26,6 @@ SessionServer = /*#__PURE__*/function () {
 
 
 
-
   function SessionServer() {_classCallCheck(this, SessionServer);
   }_createClass(SessionServer, [{ key: "init", value:
 
@@ -40,7 +39,7 @@ SessionServer = /*#__PURE__*/function () {
 
 
 
-      this.server = express();
+      this.server = (0, _express["default"])();
 
       var self = this;
 
@@ -115,7 +114,7 @@ SessionServer = /*#__PURE__*/function () {
       this.server.use(bodyParser());
 
       var FRONTENDPATH = require('./constants').FRONTENDPATH;
-      this.server.use(express["static"](FRONTENDPATH));
+      this.server.use(_express["default"]["static"](FRONTENDPATH));
 
       var self = this;
 

@@ -89,7 +89,7 @@ SessionManager = /*#__PURE__*/function () {
       function (err, results) {
 
         if (err) {
-          //TODO: errhanld
+          return callback(err); //TODO: errhanld
         }
 
         callback({
@@ -258,7 +258,7 @@ SessionManager = /*#__PURE__*/function () {
 
         if (err) {
 
-          return; //TODO: errHandle
+          return callback(err); //TODO: errHandle
         }
 
         logger.debug(JSON.stringify(results));
