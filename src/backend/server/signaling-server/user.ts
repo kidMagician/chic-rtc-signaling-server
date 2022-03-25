@@ -10,7 +10,7 @@ interface User{
     roomID?:string
 }
 
-var users :{[key:string]:User}   
+var users :{[key:string]:User}={}   
 
 const USER_STATUS={
     INROOM : 'inroom',   

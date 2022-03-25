@@ -9,7 +9,7 @@ interface Room{
     roomID:string
 }
 
-var rooms :{[key:string]:Room} 
+var rooms :{[key:string]:Room} ={}
 
 export {rooms};
 
