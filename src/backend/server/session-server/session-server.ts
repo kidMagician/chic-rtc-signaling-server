@@ -129,7 +129,12 @@ class SessionServer{
                 // throw err
             }
     
-            self.sessionManager.retrieveConnectedNode('CHIC_RTC',req.params.rid,(sessionData:any)=>{
+            self.sessionManager.retrieveConnectedNode('CHIC_RTC',req.params.rid,(err:Error,sessionData:any)=>{
+
+                if(err){
+                    logger.error(err)
+                    //TODO: errHandle
+                }
                 
                 var users =[]
                 var serverNode

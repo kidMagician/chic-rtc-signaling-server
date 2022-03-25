@@ -3,23 +3,34 @@ var errors =require('./errors')
  * websocket에 접속되어 있는 user 관리 하는 모듈 
  */
 
-var users ={};  
+interface User{
+    userID:string
+    connection:any
+    status:string
+    roomID?:string
+}
+
+var users :{[key:string]:User}   
 
 const USER_STATUS={
     INROOM : 'inroom',   
     ONLINE :'online'
 }
 
-module.exports.users = users;
-module.exports.USER_STATUS=USER_STATUS;
+export {
+    users,
+    USER_STATUS,
+    User
+};
+
 
 /**
  * 
- * @param {String} userID 
+ * @param {string} userID 
  * @param {Object} connection -websocket 커넥션 객체 
  * @param {function}} callback 
  */
-module.exports.createUser =function(userID,connection,callback){
+export function createUser(userID:string,connection:{},callback:any){
 
     if(!userID){
         callback(new errors.InvalidMessageError('userID can not be null'));
@@ -44,10 +55,10 @@ module.exports.createUser =function(userID,connection,callback){
 }
 /**
  * 
- * @param {String} userID 
+ * @param {string} userID 
  * @param {function} callback 
  */
-module.exports.deleteUser = function(userID){
+export function deleteUser(userID:string){
     
     delete users[userID];
     
@@ -55,28 +66,24 @@ module.exports.deleteUser = function(userID){
 
 /**
  * 
- * @param {String} userID 
- * @param {String} message 
+ * @param {string} userID 
+ * @param {Object} message 
  * @param {function} callback 
  */
-module.exports.sendTo = function (userID, message,callback) { 
+export function sendTo(userID:string, message:{}) { 
 
     if(!userID){
-        return callback(new errors.InvalidMessageError("userID can not be null"));
+        throw new errors.InvalidMessageError("userID can not be null")
     }
 
     if(!users[userID]){
-        return callback(new errors.InvalidMessageError("connection is not avaliavle userID:"+ userID));
+        throw new errors.InvalidMessageError("connection is not avaliavle userID:"+ userID)
     }
 
-    try{
-        users[userID].connection.send(JSON.stringify(message));
-
-    }catch(e){
-
-       return callback(e)
     
-    }
+    users[userID].connection.send(JSON.stringify(message));
+
+    
 }
 
 /**
@@ -84,7 +91,7 @@ module.exports.sendTo = function (userID, message,callback) {
  * @param {String} userID 
  * @returns {Boolean} 
  */
-module.exports.authenticate = function(userID){
+export function authenticate(userID:string){
 
     if(users[userID]){ 
         
@@ -100,10 +107,10 @@ module.exports.authenticate = function(userID){
 
 /**
  * websocket connection으로부터 user를 찾아주는 function
- * @param {String} conn 
+ * @param {any} conn 
  * @param {function} callback 
  */
-module.exports.findUserFromConnection = function(conn,callback){
+export function findUserFromConnection(conn:any,callback:any){
 
 
     if(!conn){
@@ -123,10 +130,10 @@ module.exports.findUserFromConnection = function(conn,callback){
 
 /**
  * 
- * @param {String} userID 
+ * @param {string} userID 
  * @param {function} callback 
  */
-module.exports.isInRoom = function(userID,callback){
+export function isInRoom(userID:string,callback:any){
     
     if(!userID){
         return callback(new errors.InvalidMessageError("usernaem can not be null"));
@@ -145,22 +152,22 @@ module.exports.isInRoom = function(userID,callback){
 
 /**
  * 불특정 유저에게 브로드케스트 메시지를 보내는 function
- * @param {String[]} userIDs 
- * @param {String} message 
+ * @param {string[]} userIDs 
+ * @param {string} message 
  */
-module.exports.broadcast = function(userIDs,message){
+export function broadcast(userIDs:[],message:string){
 
-    userIDs.array.forEach(userID => {
+    userIDs.forEach(userID => {
         users[userID].connection.send(JSON.stringify(message))
     });
 }
 
-module.exports.getUserNum = function(){
+export function getUserNum(){
 
     return Object.keys(users).length
 }
 
-module.exports.getConnection= function(userID,callback){
+export function getConnection(userID:string,callback:any){
     if(!userID){
         
         callback(new errors.ServerError("userID can not be null"))
@@ -169,7 +176,7 @@ module.exports.getConnection= function(userID,callback){
         if(users[userID].connection){
             callback(null, users[userID].connection)
         }else{
-            callbak(null,false)
+            callback(null,false)
         }
 
     }

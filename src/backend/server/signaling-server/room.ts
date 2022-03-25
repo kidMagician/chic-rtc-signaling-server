@@ -3,45 +3,49 @@ var ROOM_AVAILABLE_USER_NUM = require('./constants').ROOM_AVAILABLE_USER_NUM;
 var MAX_ROOM_NAME_LENGTH =require('./constants').MAX_ROOM_NAME_LENGTH;
 var MIN_ROOM_NAME_LENGTH = require('./constants').MIN_ROOM_NAME_LENGTH;
 var errors = require('./errors')
-var rooms ={}
 
-module.exports.rooms = rooms;
-
-var user= require('./user.js');
-
-var forbiddenNames = [
-    
-];
-
-/**
- * 
- * @param {*} roomName 
- */
-function isNameForbidden(roomName){
-
-    return forbiddenNames.indexOf(roomIDs) >=0;
+interface Room{
+    users:any,
+    roomID:string
 }
 
-function isNameTooLong(roomID){
+var rooms :{[key:string]:Room} 
 
-    return roomID.length > MAX_ROOM_NAME_LENGTH; 
-}
+export {rooms};
 
-function isNameTooShort(roomID){
+import * as user from './user'
 
-    return roomID.length < MIN_ROOM_NAME_LENGTH;
-}
+// var forbiddenNames :Array<string>
 
-function isUserinRoom(userID,roomID){
+// /**
+//  * 
+//  * @param {*} roomName 
+//  */
+// function isNameForbidden(roomName:string){
 
-    if (rooms[roomID].users[userID]){
+//     return forbiddenNames.indexOf(roomIDs) >=0;
+// }
+
+// function isNameTooLong(roomID:String){
+
+//     return roomID.length > MAX_ROOM_NAME_LENGTH; 
+// }
+
+// function isNameTooShort(roomID:String){
+
+//     return roomID.length < MIN_ROOM_NAME_LENGTH;
+// }
+
+// function isUserinRoom(userID:string,roomID:string){
+
+//     if (rooms[roomID].users[userID]){
         
-        return true;
-    }else{
-        return false;
-    }
+//         return true;
+//     }else{
+//         return false;
+//     }
 
-}
+// }
 
 
 
@@ -50,7 +54,7 @@ function isUserinRoom(userID,roomID){
  * @param {string} roomID 
  * @param {function} callback 
  */
-module.exports.isRoom = function(roomID,callback){
+export function isRoom(roomID:string,callback:any){
     
     if(!roomID){
         return callback(new errors.InvalidMessageError('roomID cat not be null'))
@@ -66,11 +70,11 @@ module.exports.isRoom = function(roomID,callback){
 
 /**
  * 
- * @param {String} roomID 
- * @param {String} userID 
+ * @param {string} roomID 
+ * @param {string} userID 
  * @param {function} callback 
  */
-module.exports.createRoom = function(roomID,userID,callback){
+export function createRoom(roomID:string,userID:string,callback:any){
 
     // if(!isNameForbidden(roomID)){
 
@@ -97,7 +101,7 @@ module.exports.createRoom = function(roomID,userID,callback){
         user.users[userID].status = user.USER_STATUS.INROOM;
         user.users[userID].roomID = roomID;
         
-        var users ={};
+        var users :any ={};
 
         users[userID]= user.users[userID]; 
 
@@ -117,10 +121,10 @@ module.exports.createRoom = function(roomID,userID,callback){
 }
 /**
  * 
- * @param {String} roomID 
+ * @param {string} roomID 
  * @param {function} callback 
  */
- function deleteRoom(roomID,callback){
+ function deleteRoom(roomID:string,callback:any){
 
     if(!roomID){
 
@@ -133,12 +137,12 @@ module.exports.createRoom = function(roomID,userID,callback){
 }
 /**
  * 
- * @param {String} roomID 
- * @param {String} userID 
+ * @param {string} roomID 
+ * @param {string} userID 
  * @param {function} callback 
  */
 
-module.exports.enterRoom =function(roomID,userID, callback){
+export function enterRoom(roomID:string,userID:string, callback:any){
 
     if(!roomID){
         return callback(new errors.InvalidMessageError('roomename can not be null'));
@@ -176,11 +180,11 @@ module.exports.enterRoom =function(roomID,userID, callback){
 
 /**
  * 
- * @param {String} userID 
- * @param {String} roomID 
+ * @param {string} userID 
+ * @param {string} roomID 
  * @param {function} callback 
  */
-module.exports.leaveRoom = function(userID,roomID,callback){
+export function leaveRoom(userID:string,roomID:string,callback:any){
 
     if(!roomID){
         return callback(new errors.InvalidMessageError('roomename can not be null'));
@@ -197,7 +201,7 @@ module.exports.leaveRoom = function(userID,roomID,callback){
         delete rooms[roomID].users[userID];
         
         if(Object.keys(rooms[roomID].users).length<=0){
-            deleteRoom(roomID,(err)=>{
+            deleteRoom(roomID,(err:Error)=>{
 
                 if(err){
                     return callback(err);
@@ -214,10 +218,10 @@ module.exports.leaveRoom = function(userID,roomID,callback){
 
 /**
  * 
- * @param {String} roomID 
+ * @param {string} roomID 
  * @param {callback} callback 
  */
-module.exports.checkfull = function(roomID,callback){
+export function checkfull(roomID:string,callback:any){
 
     if(!roomID){
         return callback(new errors.InvalidMessageError('roomeID can not be null'));
@@ -234,12 +238,12 @@ module.exports.checkfull = function(roomID,callback){
 
 /**
  * 룸에 있는 모든 인원에게 메시지 보내는 function
- * @param {String} from_userID 
- * @param {String} roomID 
- * @param {String} message   
+ * @param {string} from_userID 
+ * @param {string} roomID 
+ * @param {Object} message   
  * @param {function} callback 
  */
-module.exports.broadcast = function(from_userID,roomID,message,callback){
+export function broadcast(from_userID:string,roomID:string,message:Object,callback:any){
 
     if(!from_userID){
         return callback(new errors.InvalidMessageError('userID can not be null'));
@@ -255,7 +259,12 @@ module.exports.broadcast = function(from_userID,roomID,message,callback){
 
     for(var userID in rooms[roomID].users){
         if(userID != from_userID){
-            user.sendTo(userID,message,callback)
+            try{
+                user.sendTo(userID,message)
+            }catch(err){
+                callback(err)
+            }
+            
         }
     }
 

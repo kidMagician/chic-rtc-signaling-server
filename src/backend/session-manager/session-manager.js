@@ -71,6 +71,11 @@ class SessionManager{
         (asyncCB)=>{
 
           this.redisClient.smembers(ukey, function (err, res) {
+
+            if(err){
+              return asyncCB(err);
+            }
+
             userInfo=res
 
             return asyncCB();
@@ -79,6 +84,10 @@ class SessionManager{
         },
         (asyncCB)=>{
           this.redisClient.get(skey, function (err, res) {
+
+            if(err){
+              return asyncCB(err);
+            }
 
             serverInfo=res
 
@@ -92,7 +101,7 @@ class SessionManager{
           return callback(err) //TODO: errhanld
         }
 
-        callback({
+        callback(null,{
           userInfo,
           serverInfo
           

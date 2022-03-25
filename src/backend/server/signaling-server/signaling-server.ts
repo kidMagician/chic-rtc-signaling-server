@@ -1,8 +1,9 @@
 var async = require('async');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
-var userModule= require('./user.js');
-var roomModule= require('./room.js');
+import ws from 'ws'
+import * as userModule from './user'
+import * as roomModule  from './room'
 var errors = require('./errors')
 var logger =require('../../logger').logger
 
@@ -36,13 +37,19 @@ const ERR_MESSAGE ={
   SERVER_ERR:"err:serverError"
 }
 
+interface SignalMessage{
+  type:string
+}
+
 class SignalingServer extends EventEmitter{
   
+  wss:ws
+
   constructor(){
     super()
   }
 
-  init(wss,callback){
+  init(wss:ws,callback:any){
 
     if(wss){
 
@@ -63,24 +70,24 @@ class SignalingServer extends EventEmitter{
 
       var self = this
 
-      self.wss.on('connection', function(connection) {
+      self.wss.on('connection', function(connection:any) {
           
           logger.info("[SignalServer] user connected" );
 
           self.emit('connection',connection)
       
-          connection.on('message', function(message) { 
+          connection.on('message', function(message:any) { 
         
             logger.info("got message",message )  
 
-            var parsedMessage
+            var parsedMessage:SignalMessage
 
             async.waterfall([
-              function(asyncCallBack){
+              function(asyncCallBack:any){
                 self.parsingMessage(message,asyncCallBack);
                   
               },
-              function(mParsedMessage,asyncCallBack){
+              function(mParsedMessage:any,asyncCallBack:any){
         
                 parsedMessage = mParsedMessage;
         
@@ -89,7 +96,7 @@ class SignalingServer extends EventEmitter{
                 self.isInvalidMessage(parsedMessage,asyncCallBack)
         
               },
-              function(asyncCallBack){
+              function(asyncCallBack:any){
         
                 if(self.whatType(parsedMessage.type) ==="session"){
           
@@ -102,7 +109,7 @@ class SignalingServer extends EventEmitter{
           
               }
           
-              ],function(e){
+              ],function(e:any){
                 if(e){
 
                   e.sendErrMessage(connection)
@@ -120,7 +127,7 @@ class SignalingServer extends EventEmitter{
       })
   }
 
-  parsingMessage(message,callback){
+  parsingMessage(message:any,callback:any){
 
     var data; 
     
@@ -136,7 +143,7 @@ class SignalingServer extends EventEmitter{
     return callback(null,data)
   }
 
-  handleSessionMessage(parsedMessage,connection,callback){
+  handleSessionMessage(parsedMessage:any,connection:any,callback:any){
     
     var self = this
 
@@ -146,7 +153,7 @@ class SignalingServer extends EventEmitter{
       case SESSION_MESSAGE.LOGIN:
 
         
-        userModule.createUser(data.fromUserID,connection,(err,success)=>{
+        userModule.createUser(data.fromUserID,connection,(err:any,success:Boolean)=>{
 
           if(err){
 
@@ -172,7 +179,7 @@ class SignalingServer extends EventEmitter{
         
         userModule.deleteUser(data.fromUserID)
 
-        message ={
+        var message ={
         
           type: SESSION_MESSAGE.LOGOUT,
           fromUserID: data.fromUserID,
@@ -181,7 +188,7 @@ class SignalingServer extends EventEmitter{
 
         connection.send(JSON.stringify(message));
         
-        self(emit)
+        self.emit() //TODO: emit what?
 
       break;
     }
@@ -190,7 +197,7 @@ class SignalingServer extends EventEmitter{
     
   }
 
-  isInvalidMessage(parsedMessage,callback){
+  isInvalidMessage(parsedMessage:any,callback:any){
     
     var data = parsedMessage
 
@@ -280,7 +287,7 @@ class SignalingServer extends EventEmitter{
     
   }
 
-  handleMessage(parsedMessage,callback){
+  handleMessage(parsedMessage:any,callback:any){
 
     var self =this
 
@@ -293,15 +300,15 @@ class SignalingServer extends EventEmitter{
         logger.info("enter room",data.fromUserID ,data.roomID)
 
         async.waterfall([
-          function(asyncCallBack){
+          function(asyncCallBack:any){
             roomModule.isRoom(data.roomID,asyncCallBack)
 
           },
-          function(isRoom,asyncCallBack){
+          function(isRoom:Boolean,asyncCallBack:any){
               if(isRoom){
                 logger.info("enterRoom")
 
-                roomModule.enterRoom(data.roomID,data.fromUserID,(err,enteredRoom)=>{
+                roomModule.enterRoom(data.roomID,data.fromUserID,(err:Error,enteredRoom:any)=>{
                   if(err){
 
                     asyncCallBack(err);
@@ -319,7 +326,7 @@ class SignalingServer extends EventEmitter{
                 
                 logger.info("createRoom("+ data.roomID+")")
 
-                roomModule.createRoom(data.roomID,data.fromUserID,(err,createdRoom)=>{
+                roomModule.createRoom(data.roomID,data.fromUserID,(err:Error,createdRoom:any)=>{
                   
                   if(err){
                     asyncCallBack(err)
@@ -331,7 +338,7 @@ class SignalingServer extends EventEmitter{
                 })
               }
 
-          }],function(err){
+          }],function(err:Error){
             if(err){
 
               logger.error(err.toString())
@@ -356,7 +363,7 @@ class SignalingServer extends EventEmitter{
                 userID: data.fromUserID,
               }
 
-              roomModule.broadcast(data.fromUserID,data.roomID,broadcastMessage,(err)=>{
+              roomModule.broadcast(data.fromUserID,data.roomID,broadcastMessage,(err:Error)=>{
                 
                 if(err){
                   //TODO: errHandle
@@ -377,7 +384,7 @@ class SignalingServer extends EventEmitter{
       
         logger.info(data.fromUserID ," leave from",data.roomID);
         
-        roomModule.leaveRoom(data.fromUserID,data.roomID,(err)=>{
+        roomModule.leaveRoom(data.fromUserID,data.roomID,(err:Error)=>{
 
           if(err){
             //can not be err
@@ -401,7 +408,7 @@ class SignalingServer extends EventEmitter{
 
           if(roomModule.rooms[data.roomID]){
 
-            roomModule.broadcast(data.fromUserID,data.roomID,broadcastMessage,(err)=>{
+            roomModule.broadcast(data.fromUserID,data.roomID,broadcastMessage,(err:Error)=>{
               if(err){
                 
                 callback(err)
@@ -481,13 +488,13 @@ class SignalingServer extends EventEmitter{
   }
 
 
-  closeConnection(connection){
+  closeConnection(connection:any){
 
     logger.info("ws client connection close")
 
     var self = this;
     
-    userModule.findUserFromConnection(connection,(err,isUser,userID)=>{
+    userModule.findUserFromConnection(connection,(err:Error,isUser:Boolean,userID:string)=>{
       
       if(err){
         logger.error(err)  //err shuld not be happen
@@ -503,13 +510,13 @@ class SignalingServer extends EventEmitter{
     
   }
 
-  closeConnectionWithUserID(userID){
+  closeConnectionWithUserID(userID:string){
 
     logger.info('ws client connection close userID:' + userID)
 
     var self = this
     
-    userModule.isInRoom(userID,(err,isRoom,roomID)=>{
+    userModule.isInRoom(userID,(err:Error,isRoom:Boolean,roomID:string)=>{
 
       if(err){
         logger.error(err)
@@ -520,7 +527,7 @@ class SignalingServer extends EventEmitter{
 
         logger.info(userID ,"leaveRoom from " ,roomID)
 
-        roomModule.leaveRoom(userID,roomID,(err)=>{
+        roomModule.leaveRoom(userID,roomID,(err:Error)=>{
           
           if(err){
             logger.error(err)             // this err never happen. if this happen, server have to die
@@ -536,7 +543,7 @@ class SignalingServer extends EventEmitter{
                 type: BROADCASTMESSAGE.LEAVE_ROOM
               }
 
-              roomModule.broadcast(userID,roomID,broadcastMessage,(err)=>{
+              roomModule.broadcast(userID,roomID,broadcastMessage,(err:Error)=>{
                 if(err){
                   logger.error(err);
                   throw err
@@ -554,7 +561,7 @@ class SignalingServer extends EventEmitter{
 
   }
 
-  whatType(type){
+  whatType(type:string){
 
     var mType 
 

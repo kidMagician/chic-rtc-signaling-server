@@ -71,6 +71,11 @@ SessionManager = /*#__PURE__*/function () {
       function (asyncCB) {
 
         _this.redisClient.smembers(ukey, function (err, res) {
+
+          if (err) {
+            return asyncCB(err);
+          }
+
           userInfo = res;
 
           return asyncCB();
@@ -79,6 +84,10 @@ SessionManager = /*#__PURE__*/function () {
       },
       function (asyncCB) {
         _this.redisClient.get(skey, function (err, res) {
+
+          if (err) {
+            return asyncCB(err);
+          }
 
           serverInfo = res;
 
@@ -92,7 +101,7 @@ SessionManager = /*#__PURE__*/function () {
           return callback(err); //TODO: errhanld
         }
 
-        callback({
+        callback(null, {
           userInfo: userInfo,
           serverInfo: serverInfo });
 
