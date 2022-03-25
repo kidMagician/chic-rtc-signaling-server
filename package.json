@@ -12,6 +12,7 @@
   "author": "nss",
   "license": "ISC",
   "dependencies": {
+    "@types/async": "^3.2.12",
     "@types/express": "^4.17.13",
     "@types/ws": "^8.5.3",
     "async": "^3.2.2",

@@ -1,13 +1,13 @@
 import express from 'express'
 
-var bodyParser = require('body-parser')
+import bodyParser from 'body-parser'
 
 import {SessionManager} from "../../session-manager/session-manager"
 import { NodeManager } from "../../node-manager/node-manager";
 import NodeConstants from "../../node-manager/constants"
 
-var utiles = require('../../utiles/utiles')
-var  logger = require('../../logger').logger
+import utiles  from '../../utiles/utiles'
+import  {logger} from '../../logger'
 var  async = require('async')
 
 interface Config { 

@@ -1,11 +1,11 @@
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var utiles = require('./../../utiles/utiles')
+import {EventEmitter} from 'events'
+import util from 'util';
+import utiles from './../../utiles/utiles'
 import {SessionManager} from '../../session-manager/session-manager'
 import { NodeManager } from '../../node-manager/node-manager';
 import { SignalingServer } from '../signaling-server/signaling-server';
-var async = require('async')
-const  logger  = require('../../logger').logger
+var async =require('async')
+import  {logger}  from '../../logger'
 
 interface ChannelConfig{
     host:String
@@ -136,7 +136,7 @@ class ChannelServer extends EventEmitter{
         var self = this;
         
 
-        self.signal.on('enterRoom', function(roomID,room,userID) {
+        self.signal.on('enterRoom', function(roomID:string,room:any,userID:string) {
 
             self.sessionManager.addUserinfo(
                 'CHIC_RTC',roomID,userID,(err:Error)=>{
@@ -148,7 +148,7 @@ class ChannelServer extends EventEmitter{
             
         }); 
 
-        this.signal.on("createRoom", function(roomID,room,userID) { 
+        this.signal.on("createRoom", function(roomID:string,room:any,userID:string) { 
 
             async.parallel(
                 [
@@ -178,7 +178,7 @@ class ChannelServer extends EventEmitter{
 
         })
 
-        this.signal.on("leaveRoom", function(roomID,room,userID) { 
+        this.signal.on("leaveRoom", function(roomID:string,room:any,userID:string) { 
 
             self.sessionManager.removeUserinfo(
                 'CHIC_RTC',

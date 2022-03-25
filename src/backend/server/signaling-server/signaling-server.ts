@@ -1,11 +1,11 @@
 var async = require('async');
-var util = require('util');
-var EventEmitter = require('events').EventEmitter;
+import util from 'util'
+import {EventEmitter}  from 'events'
 import ws from 'ws'
 import * as userModule from './user'
 import * as roomModule  from './room'
 var errors = require('./errors')
-var logger =require('../../logger').logger
+import {logger} from '../../logger'
 
 const BROADCASTMESSAGE ={
   ENTER_ROOM:"broadcast:enterRoom",
@@ -169,7 +169,7 @@ class SignalingServer extends EventEmitter{
 
           connection.send(JSON.stringify(message));
 
-          self.emit()
+          // self.emit()
         });
 
       break;
@@ -188,7 +188,7 @@ class SignalingServer extends EventEmitter{
 
         connection.send(JSON.stringify(message));
         
-        self.emit() //TODO: emit what?
+        // self.emit() //TODO: emit what?
 
       break;
     }
