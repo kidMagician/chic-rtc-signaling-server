@@ -49,7 +49,7 @@ class SessionServer{
                 this.sessionManager =new SessionManager(this.conf.redis,function (err:Error) {
                     if (err) {
                     
-                        logger.info('session server init failed err:',err.toString())
+                        logger.error('session server init failed err:',err.toString())
             
                         
                         paralCallback(err);  //TODO:  Callback was already called err 
@@ -64,6 +64,9 @@ class SessionServer{
                 self.nodeManager = new NodeManager(self.conf.zookeeper,true,(err:Error)=>{
 
                     if(err){
+
+                        logger.error('nodeManager init failed err:',err.toString())
+
                         return paralCallback(err)
                     }
 

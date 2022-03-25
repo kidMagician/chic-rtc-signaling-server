@@ -166,7 +166,7 @@ if(options['type']=='channel'){
             });
 
         }else{
-            logger.error("signaling server init failed")      
+            logger.error("signaling server init failed err: "+ err)      
         }
         
     })
@@ -187,8 +187,6 @@ if(options['type']=='channel'){
 
     sessionServer.init(sessionConf,(err)=>{
 
-        
-    
 
         if(err){
 
