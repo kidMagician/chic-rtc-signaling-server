@@ -1,5 +1,4 @@
-
-var RedisManager = require('./redis-manager');
+var RedisManager = require('./redis-manager')
 
 const  logger  = require('../logger').logger
 const async = require('async')
@@ -12,7 +11,10 @@ var Constants = {
 
 class SessionManager{
   
-  constructor(config, callback) {
+  conf:any
+  redisClient:any
+  
+  constructor(config:any, callback:any) {
 
     this.conf = {};
 
@@ -29,13 +31,13 @@ class SessionManager{
     this.redisClient = new RedisManager(this.conf);
 
 
-    this.redisClient.on("error", function (err) {
+    this.redisClient.on("error", function (err:Error) {
 
       logger.error("Redis error encountered : " + err);
       if (callback) callback("Redis error encountered :" +err);
     });
 
-    this.redisClient.on("end", function (err) {
+    this.redisClient.on("end", function (err:Error) {
 
       logger.warn("Redis connection closed");
       if (callback) callback('ERR-REDIS', 'failed to connect to Redis server(s). ');
@@ -58,19 +60,19 @@ class SessionManager{
   * @param {string} channel - channel name
   * @param {callback} callback - callback function
   */
-  retrieveConnectedNode(app, roomID, callback) {
+  retrieveConnectedNode(app:string, roomID:string, callback:any) {
 
     var ukey =Constants.USER_INFO +":"+app +":"+ roomID
     var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
 
-    var serverInfo
-    var userInfo
+    var serverInfo:any
+    var userInfo:any
 
     async.parallel(
       [
-        (asyncCB)=>{
+        (asyncCB:any)=>{
 
-          this.redisClient.smembers(ukey, function (err, res) {
+          this.redisClient.smembers(ukey, function (err:Error, res:any) {
 
             if(err){
               return asyncCB(err);
@@ -82,8 +84,8 @@ class SessionManager{
           });
 
         },
-        (asyncCB)=>{
-          this.redisClient.get(skey, function (err, res) {
+        (asyncCB:any)=>{
+          this.redisClient.get(skey, function (err:Error, res:any) {
 
             if(err){
               return asyncCB(err);
@@ -95,7 +97,7 @@ class SessionManager{
           });
 
         }
-      ],(err,results)=>{
+      ],(err:Error,results:any)=>{
 
         if(err){
           return callback(err) //TODO: errhanld
@@ -115,11 +117,11 @@ class SessionManager{
 
   };
 
-  addUserinfo(app, roomID, userID, callback) {
+  addUserinfo(app:string, roomID:string, userID:string, callback:any) {
 
     var ukey =Constants.USER_INFO +":"+app +":"+ roomID
   
-    this.redisClient.sadd(ukey,userID,(err,result)=>{
+    this.redisClient.sadd(ukey,userID,(err:Error,result:any)=>{
   
       if(err){
         callback(err)
@@ -141,11 +143,11 @@ class SessionManager{
     return;
   }
   
-  updateServerInfo(app, roomID, server, callback) {
+  updateServerInfo(app:string, roomID:string, server:string, callback:any) {
 
     var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
   
-    this.redisClient.set(skey,server,(err,result)=>{
+    this.redisClient.set(skey,server,(err:Error,result:any)=>{
   
       if(err){
         callback(err)
@@ -167,11 +169,11 @@ class SessionManager{
   
   
   
-  removeServerinfo(app, roomID, callback) {
+  removeServerinfo(app:string, roomID:string, callback:any) {
 
     var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
   
-    this.redisClient.del(skey,(err,result)=>{
+    this.redisClient.del(skey,(err:Error,result:any)=>{
   
       if(err){
         callback(err)
@@ -204,11 +206,11 @@ class SessionManager{
   
    */
   
-  removeUserinfo(app,roomID,userID,callback){
+  removeUserinfo(app:string,roomID:string,userID:string,callback:any){
   
     var ukey =Constants.USER_INFO +":"+app +":"+ roomID
   
-    this.redisClient.srem(ukey,userID,(err,result)=>{
+    this.redisClient.srem(ukey,userID,(err:Error,result:any)=>{
   
       if(err){
         
@@ -230,13 +232,13 @@ class SessionManager{
   
   }
   
-  removeAllUserinfo(app,roomID){
+  removeAllUserinfo(app:string,roomID:string,callback:any){
   
     var ukey =Constants.USER_INFO +":"+app +":"+ roomID
   
     //대충 코드 짬 다시 짜야함
   
-    this.redisClient.smembers(ukey,(err,result)=>{
+    this.redisClient.smembers(ukey,(err:Error,result:any)=>{
   
       if(err){
         return callback(err)
@@ -246,7 +248,7 @@ class SessionManager{
       var memberCount =result
   
       for(var i=0; i<memberCount;i++){
-        self.redisClient.spop(roomID) 
+        this.redisClient.spop(roomID) 
       }
       
     })
@@ -257,13 +259,13 @@ class SessionManager{
   
   
   
-  removeAll(app, server,callback) {
+  removeAll(app:string, server:string,callback:any) { //TODO: 수정하자.
   
     var self = this;
     
     var skey = server;
   
-    this.redisClient.smembers(skey,(err,results)=>{
+    this.redisClient.smembers(skey,(err:Error,results:any)=>{
       
       if(err){
         
@@ -274,9 +276,9 @@ class SessionManager{
       console.log(JSON.stringify(results));
       var roomIDs =results;
   
-      roomIDs.forEach((roomID)=>{
+      roomIDs.forEach((roomID:string)=>{
   
-        var hkey = Constants.SMOOTHY_CONNECTION + ':' + app + ':' + roomID;
+        var hkey = app + ':' + roomID;
         
         self.redisClient.hdel(hkey,server)
   

@@ -10,9 +10,9 @@ import utiles  from '../../utiles/utiles'
 import  {logger} from '../../logger'
 var  async = require('async')
 
-interface Config { 
-    port: any;
-    host: any|null;
+interface SessionConfig { 
+    port: string|Number;
+    host: string|null;
     redis: any;
     zookeeper: any;
     balancing?: any;
@@ -21,7 +21,7 @@ interface Config {
 
 class SessionServer{
 
-    conf:Config;
+    conf:SessionConfig;
     server:express.Express
     sessionManager:SessionManager
     nodeManager:NodeManager
@@ -121,7 +121,7 @@ class SessionServer{
         
         var self =this
 
-        this.server.get('/room/:rid/user/:uid',function(req:any,res:any){
+        this.server.get('/room/:rid/user/:uid',function(req:express.Request,res:express.Response){
     
             logger.debug("[Seeion server] http get params:" +JSON.stringify(req.params))
     
@@ -179,7 +179,7 @@ class SessionServer{
         
         })
     
-        this.server.get('/',function(req:any,res:any){
+        this.server.get('/',function(req:express.Request,res:express.Response){
             
             res.sendFile(FRONTENDPATH+"/views/client.html");
     

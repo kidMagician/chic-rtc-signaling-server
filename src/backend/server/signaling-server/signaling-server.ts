@@ -4,7 +4,7 @@ import {EventEmitter}  from 'events'
 import ws from 'ws'
 import * as userModule from './user'
 import * as roomModule  from './room'
-var errors = require('./errors')
+import * as errors from './errors'
 import {logger} from '../../logger'
 
 const BROADCASTMESSAGE ={

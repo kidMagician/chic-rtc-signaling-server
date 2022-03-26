@@ -1,4 +1,4 @@
-var errors =require('./errors')
+import * as errors from './errors'
 /**
  * websocket에 접속되어 있는 user 관리 하는 모듈 
  */

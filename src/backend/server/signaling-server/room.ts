@@ -2,7 +2,7 @@
 import {ROOM_AVAILABLE_USER_NUM} from './constants'
 // var MAX_ROOM_NAME_LENGTH =require('./constants').MAX_ROOM_NAME_LENGTH;
 // var MIN_ROOM_NAME_LENGTH = require('./constants').MIN_ROOM_NAME_LENGTH;
-var errors = require('./errors')
+import * as errors from './errors'
 
 interface Room{
     users:any,
