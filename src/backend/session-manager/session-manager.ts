@@ -1,6 +1,6 @@
 var RedisManager = require('./redis-manager')
 
-const  logger  = require('../logger').logger
+import {logger}  from '../logger'
 const async = require('async')
 
 var Constants = {

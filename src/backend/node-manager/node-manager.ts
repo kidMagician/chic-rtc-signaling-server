@@ -1,10 +1,10 @@
 
-var zookeeper = require('node-zookeeper-client'),
-  logger = require('../logger').logger,
+import zookeeper from 'node-zookeeper-client'
+import  {logger} from '../logger'
 
-  constants = require('./constants'),
-  async = require('async'),
-  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
+import constants from './constants'
+var  async = require('async')
+var  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
 
 /**
  * 서버정보를 Zookeeper에 등록 후 watching 하면서 사용가능한 서버를 동적으로 관리하기 위한 모듈
