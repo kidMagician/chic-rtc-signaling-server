@@ -12,8 +12,18 @@ var zookeeper = require('node-zookeeper-client'),
  * @name NodeManager
  */
  class NodeManager{
- 
-    constructor(addr, isWatching, callback) {
+
+    address:string
+    ready:boolean
+    isWatching:boolean
+    nodeRing:any
+    servers:any
+    serverArray:any
+    connected:boolean
+    connectionTryNum:number
+    zkClient:any
+
+    constructor(addr:string, isWatching:boolean, callback:any) {
 
         this.address = addr || 'localhost:2181';
         this.ready = false;
@@ -30,7 +40,7 @@ var zookeeper = require('node-zookeeper-client'),
     };
   
   
-  _connect(isWatching, callback) {
+  _connect(isWatching:boolean, callback:any) {
   
     var self = this;
   
@@ -85,13 +95,13 @@ var zookeeper = require('node-zookeeper-client'),
    * @param {string} nodePath - node path
    * @param {callback} done - 초기화 후 수행할 callback function
    */
-  _initPath(nodePath, callback) {
+  _initPath(nodePath:string, callback:any) {
   
     var self = this;
   
     self.zkClient.exists(
       constants.BASE_ZNODE_PATH + nodePath,
-      function (error, stat) {
+      function (error:Error, stat:any) {
         if (error) {
           logger.error(error.stack);
           return;
@@ -114,11 +124,11 @@ var zookeeper = require('node-zookeeper-client'),
    * @param {string} nodePath - node path
    * @param {callback} done - 초기화 후 수행할 callback function
    */
-  _createZnode(nodePath, callback) {
+  _createZnode(nodePath:string, callback:any) {
     this.zkClient.create(
       constants.BASE_ZNODE_PATH + nodePath,
       zookeeper.CreateMode.PERSISTENT,
-      function (error) {
+      function (error:Error) {
         if (error) {
           logger.error('Failed to create node: %s due to: %s.', constants.BASE_ZNODE_PATH + nodePath, error);
           if (callback) callback(error);
@@ -138,9 +148,9 @@ var zookeeper = require('node-zookeeper-client'),
    * @param {data} data - node data
    * @param {callback} done - 초기화 후 수행할 callback function
    */
-  _createEphemeralZnode(nodePath, data, callback) {
+  _createEphemeralZnode(nodePath:string, data:any, callback:any) {
   
-    var nodeData;
+    var nodeData:any;
   
     if (data && !callback) {
       callback = data;
@@ -152,7 +162,7 @@ var zookeeper = require('node-zookeeper-client'),
       constants.BASE_ZNODE_PATH + nodePath,
       nodeData,
       zookeeper.CreateMode.EPHEMERAL,
-      function (error) {
+      function (error:any) {
   
   
         if (error) {
@@ -186,13 +196,13 @@ var zookeeper = require('node-zookeeper-client'),
    * @param {object} - node에 저장할 data
    * @param {callback} callback - 초기화 후 수행할 callback function
    */
-  _createZnodeWithData(nodePath, data, callback) {
+  _createZnodeWithData(nodePath:string, data:any, callback:any) {
   
     this.zkClient.create(
       constants.BASE_ZNODE_PATH + nodePath,
       new Buffer(data),
       zookeeper.CreateMode.PERSISTENT,
-      function (error) {
+      function (error:Error) {
         if (error) {
           logger.error('Failed to create node: %s due to: %s.', constants.BASE_ZNODE_PATH + nodePath, error);
           if (callback) callback(error);
@@ -211,11 +221,11 @@ var zookeeper = require('node-zookeeper-client'),
    * @param {string} nodePath - node path
    * @param {callback} callback - 초기화 후 수행할 callback function
    */
-  _removeZnode(nodePath, callback) {
+  _removeZnode(nodePath:string, callback:any) {
     this.zkClient.remove(
       constants.BASE_ZNODE_PATH + nodePath,
       -1,
-      function (err) {
+      function (err:Error) {
         if (err) {
           logger.error('Failed to remove node: %s due to: %s.', constants.BASE_ZNODE_PATH + nodePath, err);
           if (callback) callback(err);
@@ -231,17 +241,17 @@ var zookeeper = require('node-zookeeper-client'),
     
     this.zkClient.getChildren(
       constants.BASE_ZNODE_PATH + constants.CHANNEL_SERVERS_PATH,
-      function (event) {
+      function (event:any) {
       
         self._watchServerNodes();
       },
-      function (error, children, stat) {
+      function (error:any, children:any, stat:any) {
         if (error) {
 
           logger.warn('Failed to list children due to: %s.', error);
           if (error.getCode() == zookeeper.Exception.CONNECTION_LOSS) { 
             self.zkClient.close();
-            self._connect(self.isWatching, function (err) {
+            self._connect(self.isWatching, function (err:Error) {
               if (err) logger.error(err);
             })
           }
@@ -250,7 +260,7 @@ var zookeeper = require('node-zookeeper-client'),
 
           var max = children.length;
 
-          var nodeTask = function (taskId, value, callback) {           //its so complicated. change to promise(?) or something
+          var nodeTask = function (taskId:number, value:number, callback:any) {           //its so complicated. change to promise(?) or something
 
             self._getServerNode(children[taskId], function () {
               taskId++
@@ -261,13 +271,13 @@ var zookeeper = require('node-zookeeper-client'),
             });
           };
 
-          var startTask = function (callback) {
+          var startTask = function (callback:any) {
             self.servers = {};
             function_array.splice(function_array.length - 1, 0, nodeTask);
             callback(null, 0, 0);       //TODO callback check
           };
 
-          var finalTask = function (taskId, value, callback) {
+          var finalTask = function (taskId:number, value:number, callback:any) {
             callback(null, value);      //TODO callback check
           };
 
@@ -277,7 +287,7 @@ var zookeeper = require('node-zookeeper-client'),
 
             logger.info('  [event] server nodes [' + max + '] : ' + children);
 
-            async.waterfall(function_array, function (err, result) {
+            async.waterfall(function_array, function (err:Error, result:any) {
               self.serverArray = [];
               self.serverArray = children;
               self.nodeRing = new ConsistentHashing(self.servers);
@@ -300,14 +310,14 @@ var zookeeper = require('node-zookeeper-client'),
    * @param {number} childPath - childPath
    * @param {callback} callback -cb
    */
-  _getServerNode(childPath, cb) {
+  _getServerNode(childPath:string, cb:any) {
     var self = this;
     var path = constants.BASE_ZNODE_PATH + constants.CHANNEL_SERVERS_PATH + '/' + childPath;
 
-    var _w = function (event) {
+    var _w:any = function (event:any) {
       
       if (event.type == 3) {
-        self._getServerNode(childPath);
+        self._getServerNode(childPath,null);
       }
     };
 
@@ -317,7 +327,7 @@ var zookeeper = require('node-zookeeper-client'),
 
     self.zkClient.getData(path,
       _w,
-      function (error, data, stat) {
+      function (error:Error, data:any, stat:any) {
 
         if (error) {
           logger.error('Fail retrieve server datas: %s.', error);
@@ -345,11 +355,11 @@ var zookeeper = require('node-zookeeper-client'),
     );
   };
 
-  _getConfigNode = function (key, cb) {
+  _getConfigNode(key:any, cb:any) {
     var self = this;
     var path = constants.BASE_ZNODE_PATH + constants.CONFIG_PATH + '/' + key;
   
-    var _w = function (event) {
+    var _w = function (event:any) {
       
       if (event.type == 3) {
         self._getConfigNode(key, cb);
@@ -358,7 +368,7 @@ var zookeeper = require('node-zookeeper-client'),
   
     self.zkClient.getData(path,
       _w,
-      function (error, data, stat) {
+      function (error:Error, data:any, stat:any) {
   
         if (error) {
   
@@ -391,7 +401,7 @@ var zookeeper = require('node-zookeeper-client'),
 
   
 
-  addServerNode(config, replicas, callback) {
+  addServerNode(config:any, replicas:any, callback:any) {
 
     var self = this;
     var address = config.host;
@@ -400,7 +410,7 @@ var zookeeper = require('node-zookeeper-client'),
   
     this.zkClient.getChildren(
       constants.BASE_ZNODE_PATH + constants.CHANNEL_SERVERS_PATH,
-      function (error, nodes, stats) {
+      function (error:Error, nodes:any, stats:any) {
         if (error) {
           logger.error(error.stack);
           callback(error);
@@ -423,7 +433,7 @@ var zookeeper = require('node-zookeeper-client'),
             break;
           }
   
-          if ( typeof names[inx] == 'number' ){
+          if ( typeof ninfo[0] == 'number' ){
             names.push(Number(ninfo[0])); 
           } else {
             names.push(ninfo[0]);
@@ -449,7 +459,7 @@ var zookeeper = require('node-zookeeper-client'),
   
           var nodePath = constants.CHANNEL_SERVERS_PATH + '/' + serverName + '^' + server;
   
-          self._createEphemeralZnode(nodePath, replicas + "", (err)=>{
+          self._createEphemeralZnode(nodePath, replicas + "", (err:Error)=>{
             callback(null,nodePath)
           });
   
@@ -460,15 +470,15 @@ var zookeeper = require('node-zookeeper-client'),
     );
   };
 
-  getServerNode(key) {
+  getServerNode(key:any) {
     return this.nodeRing.getNode(key);
   };
 
-  createEphemeralPath(path, data, callback) {
+  createEphemeralPath(path:string, data:any, callback:any) {
     this._createEphemeralZnode(path, data, callback);
   };
 
-  getConfigInfo(key, cb) {
+  getConfigInfo(key:any, cb:any) {
     return this._getConfigNode(key, cb);
   };
   
