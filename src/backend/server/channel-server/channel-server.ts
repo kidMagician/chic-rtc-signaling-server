@@ -7,23 +7,30 @@ import { SignalingServer } from '../signaling-server/signaling-server';
 var async =require('async')
 import  {logger}  from '../../logger'
 
+
+
 interface ChannelConfig{
     host:String
     port:String
     zookeeper:any       //TODO: make zooConf interface 
     redis:any           //TODO: make redisConf interface
-    balancing:any       //TODO: make balancingConf interface
+    balancing:{
+        SCALE: number,          // 단계별 Connection 수
+        BUFFER_COUNT: number,   // replica 수정에 대한 인계치 버퍼
+        MAX_LEVEL: number,         // scale 배수
+        REPLICA_BASE_NUMBER: number //
+    }
 }
 
 class ChannelServer extends EventEmitter{
 
     conf:ChannelConfig;
     signal:SignalingServer;
-    serverName:String;
+    serverName:string;
     sessionManager:SessionManager
     nodeManager:NodeManager
     serverNodePath:String
-    replicas:any
+    replicas:number
 
     constructor(){
 

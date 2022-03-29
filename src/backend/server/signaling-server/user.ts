@@ -1,11 +1,12 @@
 import * as errors from './errors'
+import ws from 'ws'
 /**
  * websocket에 접속되어 있는 user 관리 하는 모듈 
  */
 
 interface User{
     userID:string
-    connection:any
+    connection:ws.WebSocket
     status:string
     roomID?:string
 }
@@ -30,7 +31,7 @@ export {
  * @param {Object} connection -websocket 커넥션 객체 
  * @param {function}} callback 
  */
-export function createUser(userID:string,connection:{},callback:any){
+export function createUser(userID:string,connection:ws.WebSocket,callback:any){
 
     if(!userID){
         callback(new errors.InvalidMessageError('userID can not be null'));
@@ -107,10 +108,10 @@ export function authenticate(userID:string){
 
 /**
  * websocket connection으로부터 user를 찾아주는 function
- * @param {any} conn 
+ * @param {ws.WebSocket} conn 
  * @param {function} callback 
  */
-export function findUserFromConnection(conn:any,callback:any){
+export function findUserFromConnection(conn:ws.WebSocket,callback:any){
 
 
     if(!conn){

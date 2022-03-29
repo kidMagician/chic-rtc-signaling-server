@@ -8,6 +8,11 @@ var Constants = {
   USER_INFO: 'USER_INFO'
 }
 
+interface SessionData{
+  userInfo:string[]         //username set
+  serverInfo:string    //servername
+}
+
 
 class SessionManager{
   
@@ -65,33 +70,33 @@ class SessionManager{
     var ukey =Constants.USER_INFO +":"+app +":"+ roomID
     var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
 
-    var serverInfo:any
-    var userInfo:any
+    var sessionData:SessionData
+    
 
     async.parallel(
       [
         (asyncCB:any)=>{
 
-          this.redisClient.smembers(ukey, function (err:Error, res:any) {
+          this.redisClient.smembers(ukey, function (err:Error, res:string[]) {
 
             if(err){
               return asyncCB(err);
             }
-
-            userInfo=res
+            
+            sessionData.userInfo=res
 
             return asyncCB();
           });
 
         },
         (asyncCB:any)=>{
-          this.redisClient.get(skey, function (err:Error, res:any) {
+          this.redisClient.get(skey, function (err:Error, res:string) {
 
             if(err){
               return asyncCB(err);
             }
 
-            serverInfo=res
+            sessionData.serverInfo=res
 
             return asyncCB();
           });
@@ -103,11 +108,7 @@ class SessionManager{
           return callback(err) //TODO: errhanld
         }
 
-        callback(null,{
-          userInfo,
-          serverInfo
-          
-        })
+        callback(null,sessionData)
         
       }
 
@@ -383,5 +384,6 @@ class SessionManager{
 
 
 export {
-  SessionManager
+  SessionManager,
+  SessionData
 }

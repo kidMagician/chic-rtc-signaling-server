@@ -70,13 +70,13 @@ class SignalingServer extends EventEmitter{
 
       var self = this
 
-      self.wss.on('connection', function(connection:any) {
+      self.wss.on('connection', function(connection:ws.WebSocket) {
           
           logger.info("[SignalServer] user connected" );
 
           self.emit('connection',connection)
       
-          connection.on('message', function(message:any) { 
+          connection.on('message', function(message:string) { 
         
             logger.info("got message",message )  
 
@@ -112,7 +112,7 @@ class SignalingServer extends EventEmitter{
               ],function(e:any){
                 if(e){
 
-                  e.sendErrMessage(connection)
+                  e.sendErrMessage(connection)    //TODO: check what is
 
                 }
                 
@@ -127,7 +127,7 @@ class SignalingServer extends EventEmitter{
       })
   }
 
-  parsingMessage(message:any,callback:any){
+  parsingMessage(message:string,callback:any){
 
     var data; 
     
@@ -143,7 +143,7 @@ class SignalingServer extends EventEmitter{
     return callback(null,data)
   }
 
-  handleSessionMessage(parsedMessage:any,connection:any,callback:any){
+  handleSessionMessage(parsedMessage:any,connection:ws.WebSocket,callback:any){    //TODO: make parsedMessage interface 
     
     var self = this
 
@@ -488,7 +488,7 @@ class SignalingServer extends EventEmitter{
   }
 
 
-  closeConnection(connection:any){
+  closeConnection(connection:ws.WebSocket){
 
     logger.info("ws client connection close")
 

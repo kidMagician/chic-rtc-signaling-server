@@ -2,7 +2,7 @@ import express from 'express'
 
 import bodyParser from 'body-parser'
 
-import {SessionManager} from "../../session-manager/session-manager"
+import {SessionManager,SessionData} from "../../session-manager/session-manager"
 import { NodeManager } from "../../node-manager/node-manager";
 import NodeConstants from "../../node-manager/constants"
 
@@ -16,7 +16,10 @@ interface SessionConfig {
     redis: any;
     zookeeper: any;
     balancing?: any;
-    ssl?:any
+    ssl?:{
+        key:string,
+        cert:string
+    }
 }
 
 class SessionServer{
@@ -72,6 +75,7 @@ class SessionServer{
 
                     self.nodeManager.createEphemeralPath(
                         NodeConstants.META_PATH + NodeConstants.SESSION_SERVER_PATH + '/' + self.conf.host + ':' + self.conf.port,
+                        null,
                         function (err:Error) {
 
                             if(err){
@@ -139,7 +143,7 @@ class SessionServer{
                     //TODO: errHandle
                 }
                 
-                var users =[]
+                var users:[] =[]
                 var serverNode
     
                 if(sessionData || sessionData.userInfo){

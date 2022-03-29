@@ -1,5 +1,5 @@
 
-import zookeeper from 'node-zookeeper-client'
+import zookeeper, { Exception } from 'node-zookeeper-client'
 import  {logger} from '../logger'
 
 import constants from './constants'
@@ -21,7 +21,7 @@ var  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
     serverArray:any
     connected:boolean
     connectionTryNum:number
-    zkClient:any
+    zkClient:zookeeper.Client
 
     constructor(addr:string, isWatching:boolean, callback:any) {
 
@@ -101,9 +101,9 @@ var  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
   
     self.zkClient.exists(
       constants.BASE_ZNODE_PATH + nodePath,
-      function (error:Error, stat:any) {
+      function (error:Error|Exception, stat:zookeeper.Stat) {
         if (error) {
-          logger.error(error.stack);
+          logger.error(error);
           return;
         }
   
@@ -128,7 +128,7 @@ var  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
     this.zkClient.create(
       constants.BASE_ZNODE_PATH + nodePath,
       zookeeper.CreateMode.PERSISTENT,
-      function (error:Error) {
+      function (error:Error|Exception) {
         if (error) {
           logger.error('Failed to create node: %s due to: %s.', constants.BASE_ZNODE_PATH + nodePath, error);
           if (callback) callback(error);
@@ -202,7 +202,7 @@ var  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
       constants.BASE_ZNODE_PATH + nodePath,
       new Buffer(data),
       zookeeper.CreateMode.PERSISTENT,
-      function (error:Error) {
+      function (error:Error|Exception) {
         if (error) {
           logger.error('Failed to create node: %s due to: %s.', constants.BASE_ZNODE_PATH + nodePath, error);
           if (callback) callback(error);
@@ -225,7 +225,7 @@ var  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
     this.zkClient.remove(
       constants.BASE_ZNODE_PATH + nodePath,
       -1,
-      function (err:Error) {
+      function (err:Error|Exception) {
         if (err) {
           logger.error('Failed to remove node: %s due to: %s.', constants.BASE_ZNODE_PATH + nodePath, err);
           if (callback) callback(err);
@@ -241,11 +241,11 @@ var  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
     
     this.zkClient.getChildren(
       constants.BASE_ZNODE_PATH + constants.CHANNEL_SERVERS_PATH,
-      function (event:any) {
+      function (event:zookeeper.Event) {
       
         self._watchServerNodes();
       },
-      function (error:any, children:any, stat:any) {
+      function (error:any, children:string[], stat:zookeeper.Stat) {
         if (error) {
 
           logger.warn('Failed to list children due to: %s.', error);
@@ -314,7 +314,7 @@ var  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
     var self = this;
     var path = constants.BASE_ZNODE_PATH + constants.CHANNEL_SERVERS_PATH + '/' + childPath;
 
-    var _w:any = function (event:any) {
+    var _w:any = function (event:zookeeper.Event) {
       
       if (event.type == 3) {
         self._getServerNode(childPath,null);
@@ -327,13 +327,13 @@ var  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
 
     self.zkClient.getData(path,
       _w,
-      function (error:Error, data:any, stat:any) {
+      function (error:Error|Exception, data:Buffer, stat:zookeeper.Stat) {
 
         if (error) {
           logger.error('Fail retrieve server datas: %s.', error);
         } else {
 
-          var replicas = 160;
+          var replicas = '160';
           if (data !== undefined && data !== null) {
             replicas = data.toString('utf8');
           }
@@ -355,11 +355,11 @@ var  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
     );
   };
 
-  _getConfigNode(key:any, cb:any) {
+  _getConfigNode(key:string, cb:any) {
     var self = this;
     var path = constants.BASE_ZNODE_PATH + constants.CONFIG_PATH + '/' + key;
   
-    var _w = function (event:any) {
+    var _w = function (event:zookeeper.Event) {
       
       if (event.type == 3) {
         self._getConfigNode(key, cb);
@@ -368,13 +368,13 @@ var  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
   
     self.zkClient.getData(path,
       _w,
-      function (error:Error, data:any, stat:any) {
+      function (error:Error|Exception, data:Buffer, stat:zookeeper.Stat) {
   
         if (error) {
   
           if (error.name == "NO_NODE") {
             if (cb) {
-              cb(configData);
+              cb();
             }
           } else {
             logger.error(error);
@@ -410,16 +410,16 @@ var  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
   
     this.zkClient.getChildren(
       constants.BASE_ZNODE_PATH + constants.CHANNEL_SERVERS_PATH,
-      function (error:Error, nodes:any, stats:any) {
+      function (error:Error|Exception, nodes:string[], stats:zookeeper.Stat) {
         if (error) {
-          logger.error(error.stack);
+          logger.error(error);
           callback(error);
           return;
         }
   
         var server = address + ':' + port;
         var isExisted = false;
-        var names = [];
+        var names:any[]= [];
   
         var existedPathName;
   
@@ -478,7 +478,7 @@ var  ConsistentHashing = require('./consistent-hashing').ConsistentHashing;
     this._createEphemeralZnode(path, data, callback);
   };
 
-  getConfigInfo(key:any, cb:any) {
+  getConfigInfo(key:string, cb:any) {
     return this._getConfigNode(key, cb);
   };
   
