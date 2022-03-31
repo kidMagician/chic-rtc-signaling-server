@@ -2,13 +2,14 @@ import express from 'express'
 
 import bodyParser from 'body-parser'
 
-import {SessionManager,SessionData} from "../../session-manager/session-manager"
+import {SessionManager} from "../../session-manager/session-manager"
 import { NodeManager } from "../../node-manager/node-manager";
 import NodeConstants from "../../node-manager/constants"
 
 import utiles  from '../../utiles/utiles'
 import  {logger} from '../../logger'
 var  async = require('async')
+
 
 interface SessionConfig { 
     port: string|Number;

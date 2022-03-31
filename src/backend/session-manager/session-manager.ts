@@ -10,7 +10,7 @@ var Constants = {
 
 interface SessionData{
   userInfo:string[]         //username set
-  serverInfo:string    //servername
+  serverInfo:string|undefined    //servername
 }
 
 
@@ -70,7 +70,10 @@ class SessionManager{
     var ukey =Constants.USER_INFO +":"+app +":"+ roomID
     var skey = Constants.SERVER_INFO+":"+ app +":"+roomID;
 
-    var sessionData:SessionData
+    var sessionData:SessionData={
+      userInfo:[],
+      serverInfo:undefined
+    }
     
 
     async.parallel(
