@@ -3,11 +3,7 @@ import {ROOM_AVAILABLE_USER_NUM} from './constants'
 // var MAX_ROOM_NAME_LENGTH =require('./constants').MAX_ROOM_NAME_LENGTH;
 // var MIN_ROOM_NAME_LENGTH = require('./constants').MIN_ROOM_NAME_LENGTH;
 import * as errors from './errors'
-
-interface Room{
-    users:any,
-    roomID:string
-}
+import {Room} from './entity'
 
 var rooms :{[key:string]:Room} ={}
 
@@ -101,7 +97,7 @@ export function createRoom(roomID:string,userID:string,callback:any){
         user.users[userID].status = user.USER_STATUS.INROOM;
         user.users[userID].roomID = roomID;
         
-        var users :any ={};
+        var users:any ={};
 
         users[userID]= user.users[userID]; 
 

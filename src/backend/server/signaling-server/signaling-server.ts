@@ -1,11 +1,12 @@
 var async = require('async');
-import util from 'util'
+
 import {EventEmitter}  from 'events'
 import ws from 'ws'
 import * as userModule from './user'
 import * as roomModule  from './room'
 import * as errors from './errors'
 import {logger} from '../../logger'
+import { Room } from './entity';
 
 const BROADCASTMESSAGE ={
   ENTER_ROOM:"broadcast:enterRoom",
@@ -109,7 +110,7 @@ class SignalingServer extends EventEmitter{
           
               }
           
-              ],function(e:any){
+              ],function(e:errors.SignalingServerError){
                 if(e){
 
                   e.sendErrMessage(connection)    //TODO: check what is
@@ -153,7 +154,7 @@ class SignalingServer extends EventEmitter{
       case SESSION_MESSAGE.LOGIN:
 
         
-        userModule.createUser(data.fromUserID,connection,(err:any,success:Boolean)=>{
+        userModule.createUser(data.fromUserID,connection,(err:errors.SignalingServerError,success:Boolean)=>{
 
           if(err){
 
@@ -308,7 +309,7 @@ class SignalingServer extends EventEmitter{
               if(isRoom){
                 logger.info("enterRoom")
 
-                roomModule.enterRoom(data.roomID,data.fromUserID,(err:Error,enteredRoom:any)=>{
+                roomModule.enterRoom(data.roomID,data.fromUserID,(err:Error,enteredRoom:Room)=>{
                   if(err){
 
                     asyncCallBack(err);
@@ -326,7 +327,7 @@ class SignalingServer extends EventEmitter{
                 
                 logger.info("createRoom("+ data.roomID+")")
 
-                roomModule.createRoom(data.roomID,data.fromUserID,(err:Error,createdRoom:any)=>{
+                roomModule.createRoom(data.roomID,data.fromUserID,(err:Error,createdRoom:Room)=>{
                   
                   if(err){
                     asyncCallBack(err)

@@ -6,6 +6,7 @@ import { NodeManager } from '../../node-manager/node-manager';
 import { SignalingServer } from '../signaling-server/signaling-server';
 var async =require('async')
 import  {logger}  from '../../logger'
+import { Room } from '../signaling-server/entity';
 
 
 
@@ -143,7 +144,7 @@ class ChannelServer extends EventEmitter{
         var self = this;
         
 
-        self.signal.on('enterRoom', function(roomID:string,room:any,userID:string) {
+        self.signal.on('enterRoom', function(roomID:string,room:Room,userID:string) {
 
             self.sessionManager.addUserinfo(
                 'CHIC_RTC',roomID,userID,(err:Error)=>{
@@ -155,7 +156,7 @@ class ChannelServer extends EventEmitter{
             
         }); 
 
-        this.signal.on("createRoom", function(roomID:string,room:any,userID:string) { 
+        this.signal.on("createRoom", function(roomID:string,room:Room,userID:string) { 
 
             async.parallel(
                 [
@@ -185,7 +186,7 @@ class ChannelServer extends EventEmitter{
 
         })
 
-        this.signal.on("leaveRoom", function(roomID:string,room:any,userID:string) { 
+        this.signal.on("leaveRoom", function(roomID:string,room:Room,userID:string) { 
 
             self.sessionManager.removeUserinfo(
                 'CHIC_RTC',

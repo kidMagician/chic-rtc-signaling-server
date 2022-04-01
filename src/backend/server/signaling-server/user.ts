@@ -1,15 +1,11 @@
 import * as errors from './errors'
 import ws from 'ws'
+import {User} from './entity'
 /**
  * websocket에 접속되어 있는 user 관리 하는 모듈 
  */
 
-interface User{
-    userID:string
-    connection:ws.WebSocket
-    status:string
-    roomID?:string
-}
+
 
 var users :{[key:string]:User}={}   
 
@@ -20,8 +16,7 @@ const USER_STATUS={
 
 export {
     users,
-    USER_STATUS,
-    User
+    USER_STATUS
 };
 
 

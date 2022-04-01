@@ -35,7 +35,8 @@ var help =[
 ].join('\n');
 
 if (argv.h || argv.help) {
-    return console.log(help);
+    console.log(help);
+    process.exit(1);
 }
 
 
@@ -166,7 +167,8 @@ if(options['type']=='channel'){
             });
 
         }else{
-            logger.error("signaling server init failed err: "+ err)      
+            logger.error("signaling server init failed err: "+ err)
+            process.exit(1)      
         }
         
     })
@@ -191,7 +193,7 @@ if(options['type']=='channel'){
         if(err){
 
             logger.error('session server init failed err:',err.toString())
-                //TODO: process kill
+            process.exit(1)
         }else{
             logger.info("sessionServer inited")
 
@@ -200,10 +202,7 @@ if(options['type']=='channel'){
                 if(err){
             
                     logger.error('session server listening failed err:',err)
-                        //TODO process kill
-                }else{
-
-                    
+                    process.exit(1)
                 }
                 
             
