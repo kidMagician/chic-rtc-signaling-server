@@ -5,7 +5,7 @@ import bodyParser from 'body-parser'
 import {SessionManager} from "../../session-manager/session-manager"
 import { NodeManager } from "../../node-manager/node-manager";
 import NodeConstants from "../../node-manager/constants"
-
+import  https  from 'https'
 import utiles  from '../../utiles/utiles'
 import  {logger} from '../../logger'
 var  async = require('async')
@@ -52,11 +52,9 @@ class SessionServer{
     
                 this.sessionManager =new SessionManager(this.conf.redis,function (err:Error) {
                     if (err) {
-                    
-                        logger.error('session server init failed err:',err.toString())
-            
                         
-                        paralCallback(err);  //TODO:  Callback was already called err 
+                        logger.error('session server init failed ')
+                        return paralCallback(err);  
                     }
 
                     paralCallback(null)
@@ -68,9 +66,7 @@ class SessionServer{
                 self.nodeManager = new NodeManager(self.conf.zookeeper,true,(err:Error)=>{
 
                     if(err){
-
-                        logger.error('nodeManager init failed err:',err.toString())
-
+                        logger.error('nodeManager init failed ')
                         return paralCallback(err)
                     }
 
@@ -80,7 +76,7 @@ class SessionServer{
                         function (err:Error) {
 
                             if(err){
-                                paralCallback(err)
+                                return paralCallback(err)
                             }else{
 
                                 self.nodeManager.getConfigInfo('balancing', function (data:any) {
@@ -141,7 +137,7 @@ class SessionServer{
 
                 if(err){
                     logger.error(err)
-                    //TODO: errHandle
+                    //TODO: errHandle send ServerError
                 }
                 
                 var users:[] =[]
@@ -194,32 +190,29 @@ class SessionServer{
 
     listen(callback:any){
 
-        try{
-            if(!this.conf.ssl){
-    
-                this.server.listen(this.conf.port,(callback))
-            }else{
-    
-                var https = require('https')
-                var options = {  
-                    key: this.conf.ssl.key,
-                    cert: this.conf.ssl.cert
-                };
         
-                https.createServer(options,this.server).listen(this.conf.port,callback)
-    
-            }
-    
-            logger.info("sessionServer listening port ",this.conf.port)
-    
-            //CHECK: try catch working??
-    
-        }catch(exception){
-    
-            console.info('session server listening failed err:',exception)
+        if(!this.conf.ssl){
+
+            this.server.listen(this.conf.port)
             
-            return callback(exception)
+        }else{
+
+            
+            var options = {  
+                key: this.conf.ssl.key,
+                cert: this.conf.ssl.cert
+            };
+    
+            https.createServer(options,this.server).listen(this.conf.port)
+
         }
+
+        logger.info("sessionServer listening port ",this.conf.port)
+
+        //TODO: port 사용중일떄 에러 발생하도록 하기
+        // logger.error('session server listening failed')
+        // return callback(exception)
+        
     
         return callback(null)
     

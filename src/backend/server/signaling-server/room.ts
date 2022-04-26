@@ -50,16 +50,12 @@ import * as user from './user'
  * @param {string} roomID 
  * @param {function} callback 
  */
-export function isRoom(roomID:string,callback:any){
-    
-    if(!roomID){
-        return callback(new errors.InvalidMessageError('roomID cat not be null'))
-    }
+export function isRoom(roomID:string){
 
     if(!rooms[roomID]){
-        callback(null,false)
+        return false
     }else{
-        return callback(null,true)
+        return true
     }
 
 }
@@ -87,11 +83,6 @@ export function createRoom(roomID:string,userID:string,callback:any){
     //     return callback(new Error('roomID is too Short'))
     // }
 
-    if(!roomID){
-
-        return callback(new errors.InvalidMessageError('roomeID can not be null'));
-    }
-
     if(user.users[userID]){
 
         user.users[userID].status = user.USER_STATUS.INROOM;
@@ -107,7 +98,7 @@ export function createRoom(roomID:string,userID:string,callback:any){
         };
 
     }else{
-        return callback(new errors.InvalidUserError(userID+' dont have connection you have to login first'))
+       throw new errors.InvalidUserError('user not exist userid: '+ userID)
     }
 
     var room = rooms[roomID]
@@ -120,16 +111,11 @@ export function createRoom(roomID:string,userID:string,callback:any){
  * @param {string} roomID 
  * @param {function} callback 
  */
- function deleteRoom(roomID:string,callback:any){
-
-    if(!roomID){
-
-        return callback(new errors.InvalidMessageError('roomID can not be null'));
-    }
+ function deleteRoom(roomID:string){
 
     delete rooms[roomID]
     
-    return callback(null)
+    return 
 }
 /**
  * 
@@ -197,12 +183,7 @@ export function leaveRoom(userID:string,roomID:string,callback:any){
         delete rooms[roomID].users[userID];
         
         if(Object.keys(rooms[roomID].users).length<=0){
-            deleteRoom(roomID,(err:Error)=>{
-
-                if(err){
-                    return callback(err);
-                }
-            });
+            deleteRoom(roomID)
         }
     
     }

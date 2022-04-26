@@ -35,6 +35,7 @@ export function createUser(userID:string,connection:ws.WebSocket,callback:any){
     if(!connection){
         callback(new errors.ServerError('connection can not be null'))
     }
+    
     if(!users[userID]){
         users[userID] ={
             userID:userID,

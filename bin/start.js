@@ -159,7 +159,11 @@ if(options['type']=='channel'){
 
             channelserver.init(channelConf,signalingServer,(err)=>{
                 if(err){
-                    logger.error('channel server init failed err:',err.toString())
+                    logger.error(
+                        'channel server init failed err:',err.message,
+                        '\n',err.stack
+                    )
+                    process.exit(1)
                 }else{
                     server.listen(wsPort)
                 }
@@ -167,7 +171,11 @@ if(options['type']=='channel'){
             });
 
         }else{
-            logger.error("signaling server init failed err: "+ err)
+            logger.error(
+                "signaling server init failed err: "+ err.toString()+
+                err.stack
+            
+            )
             process.exit(1)      
         }
         
@@ -192,7 +200,10 @@ if(options['type']=='channel'){
 
         if(err){
 
-            logger.error('session server init failed err:',err.toString())
+            logger.error(
+                'session server init failed err: ', err.toString()
+                ,'\n',err.stack
+            )
             process.exit(1)
         }else{
             logger.info("sessionServer inited")
@@ -201,7 +212,10 @@ if(options['type']=='channel'){
 
                 if(err){
             
-                    logger.error('session server listening failed err:',err)
+                    logger.error(
+                        'session server listening failed err:',err.toString(),
+                        '\n',err.stack
+                    )
                     process.exit(1)
                 }
                 

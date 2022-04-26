@@ -65,6 +65,8 @@ class SignalingServer extends EventEmitter{
     }else{
         callback(new Error("wss cant not be null"))
     }
+    
+    return
   }
 
   _start(){
@@ -145,8 +147,7 @@ class SignalingServer extends EventEmitter{
   }
 
   handleSessionMessage(parsedMessage:any,connection:ws.WebSocket,callback:any){    //TODO: make parsedMessage interface 
-    
-    var self = this
+
 
     var data = parsedMessage
     
@@ -301,15 +302,13 @@ class SignalingServer extends EventEmitter{
         logger.info("enter room",data.fromUserID ,data.roomID)
 
         async.waterfall([
+          
           function(asyncCallBack:any){
-            roomModule.isRoom(data.roomID,asyncCallBack)
 
-          },
-          function(isRoom:Boolean,asyncCallBack:any){
-              if(isRoom){
+              if(roomModule.isRoom(data.roomID)){
                 logger.info("enterRoom")
 
-                roomModule.enterRoom(data.roomID,data.fromUserID,(err:Error,enteredRoom:Room)=>{
+                roomModule.enterRoom(data.roomID,data.fromUserID,(err:errors.SignalingServerError,enteredRoom:Room)=>{
                   if(err){
 
                     asyncCallBack(err);
@@ -327,7 +326,7 @@ class SignalingServer extends EventEmitter{
                 
                 logger.info("createRoom("+ data.roomID+")")
 
-                roomModule.createRoom(data.roomID,data.fromUserID,(err:Error,createdRoom:Room)=>{
+                roomModule.createRoom(data.roomID,data.fromUserID,(err:errors.SignalingServerError,createdRoom:Room)=>{
                   
                   if(err){
                     asyncCallBack(err)
@@ -339,7 +338,7 @@ class SignalingServer extends EventEmitter{
                 })
               }
 
-          }],function(err:Error){
+          }],function(err:errors.SignalingServerError){
             if(err){
 
               logger.error(err.toString())
@@ -364,14 +363,13 @@ class SignalingServer extends EventEmitter{
                 userID: data.fromUserID,
               }
 
-              roomModule.broadcast(data.fromUserID,data.roomID,broadcastMessage,(err:Error)=>{
+              roomModule.broadcast(data.fromUserID,data.roomID,broadcastMessage,(err:errors.SignalingServerError)=>{
                 
                 if(err){
                   //TODO: errHandle
                 }
 
               })
-
               
               callback(null)
               
@@ -435,8 +433,7 @@ class SignalingServer extends EventEmitter{
           sdp: data.sdp, 
           toUserID: data.toUserID
         }); 
-
-        // self.emit();  
+  
         callback(null)
 
       break;
@@ -452,7 +449,7 @@ class SignalingServer extends EventEmitter{
           toUserID: data.toUserID
         }); 
 
-        // self.emit();
+        
         callback(null)
 
       break; 
